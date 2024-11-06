@@ -41,7 +41,7 @@ metro_air_leak_anomaly_detection/
 #### 1. Clone the Repository (if applicable)
 
 ```bash
-git clone <your-repository-url>
+git clone git@github.com:hasnat-abdullah/metro_air_leak_anomaly_detection.git
 cd metro_air_leak_anomaly_detection
 ```
 
