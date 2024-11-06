@@ -93,4 +93,4 @@ Logs are stored in the logs/ directory and provide detailed insights into each m
 
 ## License
 
-Distributed under the MIT License. See LICENSE for more information.
+This project is licensed under the MIT License - see the [MIT License](https://opensource.org/licenses/MIT) for details.
