@@ -1,0 +1,5 @@
+# Configuration file for global parameters
+
+data:
+  filepath: "../data/raw/MetroPT3AirCompressor_data.csv"  # Path to the dataset CSV file
+  timestamp_column: "timestamp"

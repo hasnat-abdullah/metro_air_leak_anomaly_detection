@@ -1,0 +1,56 @@
+# Byte-compiled / optimized / DLL files
+
+pycache/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+
+# IDE specific
+.idea/
+.vscode/
+
+# Logs and debugging files
+
+logs/
+*.log
+*.out
+
+# Jupyter Notebook checkpoints
+
+.ipynb_checkpoints/
+
+# Python virtual environments
+
+venv/
+.env/
+.venv/
+env.bak/
+venv.bak/
+
+# Data files
+
+data/raw/
+data/processed/
+
+# Configurations and environment files
+
+config/config.yaml
+*.env
+
+# Ignore OS-specific files
+
+.DS_Store
+Thumbs.db
+
+# Testing output
+
+test-output/
+.junit/
+
+# Any file type that may contain secrets
+
+*.pem
+*.key
