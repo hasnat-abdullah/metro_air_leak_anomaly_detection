@@ -145,7 +145,6 @@ class DataStreamer:
             logger.error(f"Unexpected error: {e}")
         finally:
             self.data_sink.close()
-            logger.info("Kafka producer closed.")
 
 
 def main():
