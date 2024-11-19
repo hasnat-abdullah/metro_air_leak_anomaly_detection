@@ -32,7 +32,7 @@ COLUMNS = ['_timestamp', 'tp2', 'tp3', 'h1', 'dv_pressure', 'reservoirs', 'oil_t
 
 
 class DataSource(ABC):
-    """Abstract class for data source (e.g., PostgreSQL)."""
+    """Abstract class for raw_data source (e.g., PostgreSQL)."""
 
     @abstractmethod
     def fetch_data(self, last_fetched_timestamp):
@@ -40,7 +40,7 @@ class DataSource(ABC):
 
 
 class DataSink(ABC):
-    """Abstract class for data sink (e.g., Kafka)."""
+    """Abstract class for raw_data sink (e.g., Kafka)."""
 
     @abstractmethod
     def send_data(self, data):
@@ -48,7 +48,7 @@ class DataSink(ABC):
 
 
 class PostgreSQLConnection(DataSource):
-    """PostgreSQL database connection and data fetcher."""
+    """PostgreSQL database connection and raw_data fetcher."""
 
     def __init__(self, config):
         self.config = config
@@ -64,7 +64,7 @@ class PostgreSQLConnection(DataSource):
             raise
 
     def fetch_data(self, last_fetched_timestamp):
-        """Fetch data from PostgreSQL."""
+        """Fetch raw_data from PostgreSQL."""
         query = """
         SELECT _timestamp, tp2, tp3, h1, dv_pressure, reservoirs, oil_temperature, motor_current, comp, dv_eletric, 
                towers, mpg, lps, pressure_switch, oil_level, caudal_impulses, _status
@@ -81,12 +81,12 @@ class PostgreSQLConnection(DataSource):
             logger.info(f"Fetched {len(rows)} rows starting from {last_fetched_timestamp}")
             return rows, rows[-1][0]  # Update last fetched timestamp
         else:
-            logger.info("No new data fetched.")
+            logger.info("No new raw_data fetched.")
             return rows, last_fetched_timestamp
 
 
 class KafkaDataProducer(DataSink):
-    """Kafka producer to send data to Kafka topic."""
+    """Kafka producer to send raw_data to Kafka topic."""
 
     def __init__(self, servers, topic):
         self.producer = KafkaProducer(
@@ -96,11 +96,11 @@ class KafkaDataProducer(DataSink):
         self.topic = topic
 
     def send_data(self, data):
-        """Send data to Kafka."""
+        """Send raw_data to Kafka."""
         try:
             self.producer.send(self.topic, value=data)
         except Exception as e:
-            logger.error(f"Error sending data to Kafka: {e}")
+            logger.error(f"Error sending raw_data to Kafka: {e}")
 
     def close(self):
         """Close the Kafka producer."""
@@ -109,7 +109,7 @@ class KafkaDataProducer(DataSink):
 
 
 def convert_row_to_dict(columns, row):
-    """Convert a row of data to a dictionary."""
+    """Convert a row of raw_data to a dictionary."""
     row_dict = dict(zip(columns, row))
     if isinstance(row_dict['_timestamp'], datetime.datetime):
         row_dict['_timestamp'] = row_dict['_timestamp'].strftime('%Y-%m-%d %H:%M:%S')
@@ -119,7 +119,7 @@ def convert_row_to_dict(columns, row):
 
 
 class DataStreamer:
-    """Main class to stream data from source to sink."""
+    """Main class to stream raw_data from source to sink."""
 
     def __init__(self, data_source, data_sink, columns):
         self.data_source = data_source
@@ -129,7 +129,7 @@ class DataStreamer:
     def start_streaming(self, initial_timestamp='2020-02-01 00:00:00'):
         last_fetched_timestamp = initial_timestamp
         try:
-            logger.info("Starting data stream...")
+            logger.info("Starting raw_data stream...")
 
             while True:
                 rows, last_fetched_timestamp = self.data_source.fetch_data(last_fetched_timestamp)
@@ -148,7 +148,7 @@ class DataStreamer:
 
 
 def main():
-    """Set up and start the data streaming process."""
+    """Set up and start the raw_data streaming process."""
     pg_connection = PostgreSQLConnection(PG_CONFIG)
     kafka_producer = KafkaDataProducer(KAFKA_SERVERS, KAFKA_TOPIC)
 
