@@ -52,6 +52,7 @@ Thumbs.db
 
 test-output/
 .junit/
+src/results/*
 
 # Any file type that may contain secrets
 
