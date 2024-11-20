@@ -7,23 +7,31 @@ This project focuses on detecting anomalies in air compressor data to support pr
 
 metro_air_leak_anomaly_detection/
 ```
-├── data/
-│   ├── raw/                    # Raw data files (e.g., original CSV files)
-│   ├── processed/              # Preprocessed data ready for model training
-│
+├── raw_data/                   # Raw data files (e.g., original CSV files)
 ├── src/                        # Source code for the project
 │   ├── init.py                 # Init file for package recognition
-│   ├── data_preprocessing.py   # Data loading and preprocessing functions
-│   ├── feature_engineering.py  # Feature engineering utilities
+│   ├── config.py               # Configuration file for global parameters (e.g., path, postgres cred)
+│   ├── data                    # Data loading and preprocessing functions
+│   │   ├── init.py
+│   │   ├── loader.py           # load data from postgres or somewhere else
+│   │   ├── preprocessing.py    # preprocessing steps before training a model
+│   ├── evaluation              # benchmarking the models performances
+│   │   ├── init.py
+│   │   ├── metrices.py         # calculate the performance metrices
 │   ├── models/                 # Folder for model classes
 │   │   ├── init.py
-│   │   ├── model_name.py       # specific model implementation
-│   ├── evaluation.py           # Evaluation metrics and performance comparison functions
+│   │   ├── base_model.py       # base_model implementation which will be inherited by all models 
+│   │   ├── {model_name}.py     # specific model implementation
+│   ├── results                 # trained models will be saved here as well as performance report
+│   │   ├── {batch_number}_datetime       # ex: 001_2024-11-19_17-03 : formated way to store the models and reports
+│   │   │   ├── models          # store all trained models as '.pkl' fromat
+│   │   │   │   ├── {model_name}_model.pkl          # trained model as '.pkl' fromat
+│   │   │   ├── reports.csv     # performance metrices of all trained models as csv file
+│   └── utils.py                # helper functions
+│   │   ├── {file_name}.py      # helper functions to reuse and keep the main functions clean
 │   └── main.py                 # Main script to execute the pipeline end-to-end
-│
-├── config.yaml                 # Configuration file for global parameters (e.g., paths, model params)
 ├── tests/                      # Unit tests and integration tests
-├── scripts/                    # Scripts for specific tasks (e.g., data processing, training)
+├── scripts/                    # Scripts for specific tasks (e.g., produce data by kafka etc)
 ├── logs/                       # different level of application log
 ├── requirements.txt            # Required libraries and dependencies
 ├── README.md                   # Project overview, setup, and instructions
@@ -60,9 +68,9 @@ pip install -r requirements.txt
 
 #### 4. Put dataset
 
-Put the dataset(.csv) at the directory`data/raw/`
+Put the dataset(.csv) at the directory`raw_data/`
 
-#### 4. Configure the `config/config.yaml` file
+#### 4. Configure the `src/config.py` file
 
 Ensure paths and model parameters are correct in the configuration file.
 
