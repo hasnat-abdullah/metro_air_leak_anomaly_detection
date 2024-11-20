@@ -46,7 +46,7 @@ def main():
         "KNN": KNNModel(),
         "Random Cut Forest": RandomCutForest(),
         # "XGBoost": XGBoostModel(),
-        "DBSCAN": DBSCANModel(eps=0.5, min_samples=5),
+        "DBSCAN": DBSCANModel(eps=0.3, min_samples=10),
         "Local Outlier Factor": LOFModel(n_neighbors=20),
         "Deep AutoEncoder": DeepAutoEncoder(input_dim=X_train.shape[1]),
         "Variational Autoencoder": VAEModel(input_dim=X_train.shape[1]),
@@ -93,11 +93,14 @@ def main():
             traceback.print_exc()
 
     print("\nEvaluation Results:")
-    print(pd.DataFrame.from_dict(results, orient='index'))
+
+    df = pd.DataFrame.from_dict(results, orient='index')
+    pd.set_option('display.max_columns', None)
+    print(df)
 
     # Store results to CSV in the batch folder
-    supervised_evaluator.store_results(output_path=f'{RESULT_OUTPUT_FOLDER}/supervised_results.csv')
-    unsupervised_evaluator.store_results(output_path=f'{RESULT_OUTPUT_FOLDER}/unsupervised_results.csv')
+    supervised_evaluator.store_results(output_path=f'{output_folder}/supervised_results.csv')
+    unsupervised_evaluator.store_results(output_path=f'{output_folder}/unsupervised_results.csv')
 
 if __name__ == "__main__":
     main()

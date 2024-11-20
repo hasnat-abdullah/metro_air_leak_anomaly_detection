@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 from typing import List
 from sklearn.metrics import roc_auc_score, f1_score, precision_score, recall_score, accuracy_score
+import numpy as np  # For handling thresholds
 
 # Abstract Base Class for model evaluation
 class BaseEvaluator(ABC):
@@ -29,7 +30,11 @@ class SupervisedEvaluator(BaseEvaluator):
         # Calculate metrics for supervised model
         metrics = {"Model": model_name}
         for metric in self.metrics:
-            metrics[metric.__name__] = metric(y_true, y_pred)
+            try:
+                metrics[metric.__name__] = metric(y_true, y_pred)
+            except ValueError as e:
+                print(f"Error calculating {metric.__name__}: {e}")
+                metrics[metric.__name__] = np.nan  # Use NaN to indicate an issue
 
         self.evaluations.append(metrics)
         return metrics
@@ -48,7 +53,13 @@ class UnsupervisedEvaluator(BaseEvaluator):
         # Calculate metrics for unsupervised model
         metrics = {"Model": model_name}
         for metric in self.metrics:
-            metrics[metric.__name__] = metric(y_true, predictions)
+            try:
+                metrics[metric.__name__] = metric(y_true, predictions)
+            except ValueError as e:
+                print(f"Error calculating {metric.__name__}: {e}")
+                metrics[metric.__name__] = np.nan  # Use NaN to indicate an issue
 
+        # Add threshold info for better debugging
+        metrics["Threshold"] = threshold
         self.evaluations.append(metrics)
         return metrics
