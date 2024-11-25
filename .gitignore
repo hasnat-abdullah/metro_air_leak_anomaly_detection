@@ -32,10 +32,8 @@ venv.bak/
 
 # Data files
 
-raw_data/raw/*
-raw_data/processed/*
-!raw_data/raw/__init__.py
-!raw_data/processed/__init__.py
+raw_data/*
+!raw_data/__init__.py
 
 
 # Configurations and environment files
