@@ -15,17 +15,17 @@ def generate(data_loader: DataLoader,time_column, value_column,save_dir):
     plotter = Plotter(data,time_column, value_column,save_dir)
 
     plotter.plot_values_over_time()
-    # plotter.plot_scatter_plot_for_outliers()
-    # plotter.plot_boxplot_for_anomalies()
-    # plotter.plot_distribution_of_values()
-    # plotter.plot_rolling_average(window=1000)
-    # plotter.plot_seasonal_decomposition(period=24)
-    # plotter.plot_heatmap_of_hourly_trends()
-    # plotter.plot_heatmap_of_hourly_aggregated_data()
-    # plotter.plot_anomaly_highlight(lower_threshold = 10, upper_threshold = 90)
-    # plotter.plot_violin_plot_by_hour()
-    # plotter.plot_scatter_plot_with_moving_averages(short_window=50, long_window = 200)
-    # plotter.plot_lag_plot()
+    plotter.plot_scatter_plot_for_outliers()
+    plotter.plot_boxplot_for_anomalies()
+    plotter.plot_distribution_of_values()
+    plotter.plot_rolling_average(window=1000)
+    plotter.plot_seasonal_decomposition(period=24)
+    plotter.plot_heatmap_of_hourly_trends()
+    plotter.plot_heatmap_of_hourly_aggregated_data()
+    plotter.plot_anomaly_highlight(lower_threshold = 10, upper_threshold = 90)
+    plotter.plot_violin_plot_by_hour()
+    plotter.plot_scatter_plot_with_moving_averages(short_window=50, long_window = 200)
+    plotter.plot_lag_plot()
 
 if __name__ == "__main__":
     save_dir = "./image"
