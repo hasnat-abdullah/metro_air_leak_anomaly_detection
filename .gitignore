@@ -32,7 +32,7 @@ venv.bak/
 
 # Data files
 
-raw_data/*
+raw_data/
 !raw_data/__init__.py
 
 
@@ -50,9 +50,11 @@ Thumbs.db
 
 test-output/
 .junit/
-src/results/*
+src/results/
+/src/data/visualization/image/
 
 # Any file type that may contain secrets
 
 *.pem
 *.key
+
