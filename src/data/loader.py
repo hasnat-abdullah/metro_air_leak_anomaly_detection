@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import pandas as pd
 from sqlalchemy import create_engine
 
+from src.utils.others import track_execution_time
+
 
 class DataLoader(ABC):
     """Abstract base class for data loaders."""
@@ -17,6 +19,7 @@ class CSVDataLoader(DataLoader):
         self.file_path = file_path
         self.usecols = usecols
 
+    @track_execution_time
     def load_data(self):
         return pd.read_csv(self.file_path, usecols=self.usecols)
 
@@ -26,6 +29,7 @@ class PostgreSQLDataLoader(DataLoader):
         self.engine = create_engine(db_url)
         self.query = query
 
+    @track_execution_time
     def load_data(self):
         return pd.read_sql_query(self.query, con=self.engine)
 
@@ -35,6 +39,7 @@ class InfluxDBDataLoader(DataLoader):
         self.client = client
         self.query = query
 
+    @track_execution_time
     def load_data(self):
         result = self.client.query(self.query)
         return pd.DataFrame(list(result.get_points()))
