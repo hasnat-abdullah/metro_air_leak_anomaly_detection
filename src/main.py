@@ -1,7 +1,7 @@
 from datetime import datetime
 import traceback
 import pandas as pd
-from data.loader import DataLoader
+from data.loader import PostgreSQLDataLoader
 from data.preprocessing import Preprocessor
 from models.isolation_forest import IsolationForestModel
 from models.autoencoder import AutoEncoder
@@ -13,7 +13,6 @@ from models.mahalanobis import MahalanobisModel
 from models.random_cut_forest import RandomCutForest
 from models.knn import KNNModel
 from models.vae import VAEModel
-from models.xgboost import XGBoostModel
 from evaluation.metrics import SupervisedEvaluator, UnsupervisedEvaluator
 from src.models.dbscan import DBSCANModel
 from src.models.deep_autoencoder import DeepAutoEncoder
@@ -29,8 +28,8 @@ from src.models.base_model import SupervisedModel, UnsupervisedModel
 RESULT_OUTPUT_FOLDER = "results"
 
 def main():
-    loader = DataLoader(DATABASE_URL)
-    df = loader.load_data(QUERY)
+    loader = PostgreSQLDataLoader(db_url=DATABASE_URL, query=QUERY)
+    df = loader.load_data()
 
     # Preprocess data
     preprocessor = Preprocessor()
@@ -39,13 +38,12 @@ def main():
     models = {
         "Isolation Forest": IsolationForestModel(contamination=0.01),
         "AutoEncoder": AutoEncoder(input_dim=X_train.shape[1]),
-        # "One-Class SVM": OneClassSVMModel(kernel="rbf", nu=0.05),
+        "One-Class SVM": OneClassSVMModel(kernel="rbf", nu=0.05),
         "LODA": LODAModel(n_bins=10),
         "LSTM": LSTMModel(input_dim=X_train.shape[1]),
         "Mahalanobis Distance": MahalanobisModel(),
         "KNN": KNNModel(),
         "Random Cut Forest": RandomCutForest(),
-        # "XGBoost": XGBoostModel(),
         "DBSCAN": DBSCANModel(eps=0.3, min_samples=10),
         "Local Outlier Factor": LOFModel(n_neighbors=20),
         "Deep AutoEncoder": DeepAutoEncoder(input_dim=X_train.shape[1]),
