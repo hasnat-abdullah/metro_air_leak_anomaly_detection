@@ -19,6 +19,8 @@ import seaborn as sns
 from statsmodels.tsa.seasonal import seasonal_decompose
 from pandas.plotting import lag_plot
 
+from src.utils.others import track_execution_time
+
 # Setting up a logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -43,12 +45,13 @@ class Plotter:
         """Generic method to handle plotting and saving."""
         plt.figure(figsize=(14, 6))
         plot_func()  # Call the plot function passed to it
-        plt.legend(loc='right')
+        plt.legend()
         plt.grid(True)
         plt.tight_layout()
         self._save_plot(plot_name)
         plt.show()
 
+    @track_execution_time
     def plot_values_over_time(self):
         """Plot values over time."""
 
@@ -61,6 +64,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_over_time.png')
 
+    @track_execution_time
     def plot_scatter_plot_for_outliers(self, alpha: float = 0.5, size: int = 10, color: str = 'blue'):
         """Plot a scatter plot for outliers in the values."""
 
@@ -72,6 +76,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_scatter_plot_outliers.png')
 
+    @track_execution_time
     def plot_boxplot_for_anomalies(self):
         """Plot a boxplot to detect anomalies in the values."""
 
@@ -81,6 +86,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_boxplot.png')
 
+    @track_execution_time
     def plot_distribution_of_values(self):
         """Plot the distribution of values."""
 
@@ -92,6 +98,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_distribution.png')
 
+    @track_execution_time
     def plot_rolling_average(self, window: int = 1000):
         """Plot values with rolling average."""
         self.data[f'{self.value_column}_RollingMean'] = self.data[self.value_column].rolling(window=window).mean()
@@ -107,6 +114,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_rolling_mean.png')
 
+    @track_execution_time
     def plot_seasonal_decomposition(self, period: int = 24):
         """Plot seasonal decomposition of values."""
         data_resampled = self.data.set_index(self.time_column).resample('H').mean()
@@ -119,6 +127,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_seasonal_decomposition.png')
 
+    @track_execution_time
     def plot_heatmap_of_hourly_trends(self):
         """Plot a heatmap showing hourly trends of values."""
         self.data['hour'] = self.data[self.time_column].dt.hour
@@ -133,6 +142,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_heatmap_hourly_trends.png')
 
+    @track_execution_time
     def plot_heatmap_of_hourly_aggregated_data(self):
         """Plot a heatmap of hourly aggregated values."""
         self.data['hour'] = self.data[self.time_column].dt.hour
@@ -147,6 +157,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_hourly_aggregated_data_heatmap.png')
 
+    @track_execution_time
     def plot_anomaly_highlight(self, lower_threshold: float = 10, upper_threshold: float = 90):
         """Highlight anomalies in values."""
         anomalies = self.data[
@@ -163,6 +174,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_anomaly_highlight.png')
 
+    @track_execution_time
     def plot_violin_plot_by_hour(self):
         """Plot a violin plot showing values by hour of the day."""
 
@@ -174,6 +186,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_violin_plot_by_hour.png')
 
+    @track_execution_time
     def plot_scatter_plot_with_moving_averages(self, short_window: int = 50, long_window: int = 200):
         """Plot scatter plot with short-term and long-term moving averages."""
         self.data['short_mavg'] = self.data[self.value_column].rolling(window=short_window).mean()
@@ -192,6 +205,7 @@ class Plotter:
 
         self._plot_and_save(plot_func, f'{self.value_column}_moving_averages.png')
 
+    @track_execution_time
     def plot_lag_plot(self):
         """Plot lag plot for values."""
 

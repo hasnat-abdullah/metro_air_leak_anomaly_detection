@@ -2,7 +2,10 @@ import pandas as pd
 
 from src.data.loader import DataLoader, CSVDataLoader, PostgreSQLDataLoader, InfluxDBDataLoader
 from src.data.visualization.plotter import Plotter
+from src.utils.others import track_execution_time
 
+
+@track_execution_time
 def generate(data_loader: DataLoader,time_column, value_column,save_dir):
     data = data_loader.load_data()
 

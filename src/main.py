@@ -14,11 +14,21 @@ from models.random_cut_forest import RandomCutForest
 from models.knn import KNNModel
 from models.vae import VAEModel
 from evaluation.metrics import SupervisedEvaluator, UnsupervisedEvaluator
+from src.models.ADA_boost import AdaBoostModel
+from src.models.Bayesian_network import BayesianNetworkModel
+from src.models.DWT import DTWModel
+from src.models.DeepAD import DeepAD
+from src.models.LSTM_autoencoder import LSTMAutoencoder
+from src.models.Matrix_profile import MatrixProfileModel
+from src.models.S_H_ESD import SHESDModel
+from src.models.Time_GAN import TimeGAN
 from src.models.dbscan import DBSCANModel
 from src.models.deep_autoencoder import DeepAutoEncoder
+from src.models.gaussian_process_regression import GaussianProcessModel
 from src.models.gmm import GMMModel
 from src.models.k_means import KMeansModel
 from src.models.lof import LOFModel
+from src.models.prophet import ProphetModel
 from src.models.rpca import RPCA
 from src.utils.others import create_result_output_folder
 from utils.model_saver import ModelSaver
@@ -38,19 +48,29 @@ def main():
     models = {
         "Isolation Forest": IsolationForestModel(contamination=0.01),
         "AutoEncoder": AutoEncoder(input_dim=X_train.shape[1]),
-        "One-Class SVM": OneClassSVMModel(kernel="rbf", nu=0.05),
+        # "One-Class SVM": OneClassSVMModel(kernel="rbf", nu=0.05),
         "LODA": LODAModel(n_bins=10),
         "LSTM": LSTMModel(input_dim=X_train.shape[1]),
         "Mahalanobis Distance": MahalanobisModel(),
         "KNN": KNNModel(),
         "Random Cut Forest": RandomCutForest(),
-        "DBSCAN": DBSCANModel(eps=0.3, min_samples=10),
+        # "DBSCAN": DBSCANModel(eps=0.3, min_samples=10),
         "Local Outlier Factor": LOFModel(n_neighbors=20),
         "Deep AutoEncoder": DeepAutoEncoder(input_dim=X_train.shape[1]),
         "Variational Autoencoder": VAEModel(input_dim=X_train.shape[1]),
         "Gaussian Mixture Model": GMMModel(n_components=2),
         "Robust PCA": RPCA(),
         "K-Means": KMeansModel(n_clusters=2),
+        "LSTM Autoencoder": LSTMAutoencoder(input_dim=10, timesteps=5, latent_dim=3),
+        "S-H-ESD": SHESDModel(alpha=0.05),
+        "TimeGAN": TimeGAN(generator=None, discriminator=None),  # Replace with actual models
+        "DeepAD": DeepAD(input_dim=10),
+        "Bayesian Network": BayesianNetworkModel(),
+        "Gaussian Process": GaussianProcessModel(),
+        "Prophet": ProphetModel(),
+        "DTW": DTWModel(reference_series=[1, 2, 3]),
+        "Matrix Profile": MatrixProfileModel(window_size=10),
+        "AdaBoost": AdaBoostModel(n_estimators=100),
     }
 
 
