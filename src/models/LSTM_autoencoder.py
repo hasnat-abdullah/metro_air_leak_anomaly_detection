@@ -1,3 +1,25 @@
+"""
+LSTM Autoencoders:
+- A neural network model combining LSTM networks with an autoencoder structure.
+- Encodes time series into a compressed latent representation and decodes it to reconstruct the sequence.
+- Anomalies are identified based on high reconstruction errors, indicating deviations from normal patterns.
+
+Key Concepts:
+- LSTM Networks: Handle long-term dependencies using memory cells and gating mechanisms.
+- Autoencoder Architecture: Consists of an encoder for compression and a decoder for reconstruction.
+- Reconstruction Errors: High errors signify anomalies in the input data.
+
+Advantages:
+- Captures temporal dependencies in sequential data.
+- Effective for complex and high-dimensional time series patterns.
+- Adaptable architecture for specific datasets.
+
+Applications:
+- Predictive maintenance in industrial systems.
+- Fraud detection in financial transactions.
+- Anomaly detection in medical time series data.
+"""
+
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from src.models.base_model import UnsupervisedModel

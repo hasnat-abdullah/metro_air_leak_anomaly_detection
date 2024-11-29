@@ -1,3 +1,23 @@
+"""
+S-H-ESD (Seasonal Hybrid Extreme Studentized Deviate):
+- A statistical anomaly detection method tailored for time series data with seasonality.
+- Extends the classical ESD test by incorporating seasonal decomposition into the analysis.
+
+Key Concepts:
+- Seasonality: Identifies periodic patterns in time series data.
+- Extreme Studentized Deviate (ESD) Test: Detects outliers iteratively using statistical measures.
+- Hybrid Model: Combines robust statistical techniques for effective anomaly detection.
+
+Advantages:
+- Handles seasonal components and trends in time series data.
+- Simple implementation for univariate time series.
+- Effective for noisy datasets with regular patterns.
+
+Applications:
+- Monitoring seasonal metrics like sales or website traffic.
+- Detecting anomalies in environmental and sensor data.
+"""
+
 from pyculiarity import detect_ts
 from src.models.base_model import UnsupervisedModel
 

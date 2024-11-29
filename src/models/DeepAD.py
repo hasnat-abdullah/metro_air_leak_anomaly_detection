@@ -1,3 +1,25 @@
+"""
+DeepAD (Deep Anomaly Detection):
+- A deep learning-based anomaly detection framework using dense or recurrent neural networks.
+- Trains on normal data and learns to reconstruct input sequences with minimal error.
+- High reconstruction errors during inference indicate potential anomalies.
+
+Key Concepts:
+- Reconstruction Errors: Used to measure deviations from normal patterns.
+- Deep Neural Networks: Capture complex and high-dimensional patterns in data.
+- Unsupervised Learning: No labeled anomalies are needed during training.
+
+Advantages:
+- Handles non-linear and high-dimensional data effectively.
+- Scalable for large datasets.
+- Adaptable to various input types.
+
+Applications:
+- Industrial monitoring and predictive maintenance.
+- Anomaly detection in network traffic and cybersecurity.
+- Healthcare and bioinformatics anomaly detection.
+"""
+
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from src.models.base_model import UnsupervisedModel

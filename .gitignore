@@ -51,10 +51,11 @@ Thumbs.db
 test-output/
 .junit/
 src/results/
-/src/data/visualization/image/
+/src/visualization/image/
 
 # Any file type that may contain secrets
 
 *.pem
 *.key
 
+/src/visualization/images/

@@ -117,7 +117,7 @@ class Plotter:
     @track_execution_time
     def plot_seasonal_decomposition(self, period: int = 24):
         """Plot seasonal decomposition of values."""
-        data_resampled = self.data.set_index(self.time_column).resample('H').mean()
+        data_resampled = self.data.set_index(self.time_column).resample('h').mean()
         decomposition = seasonal_decompose(data_resampled[self.value_column].dropna(), model='additive', period=period)
 
         def plot_func():

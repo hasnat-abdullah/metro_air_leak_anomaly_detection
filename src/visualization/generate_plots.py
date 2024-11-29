@@ -1,18 +1,15 @@
 import pandas as pd
+from pandas import DataFrame
 
-from src.data.loader import DataLoader, CSVDataLoader, PostgreSQLDataLoader, InfluxDBDataLoader
-from src.data.visualization.plotter import Plotter
+from src.data.loader import DataLoader, CSVDataLoader
+from src.visualization.plotter import Plotter
 from src.utils.others import track_execution_time
 
 
 @track_execution_time
-def generate(data_loader: DataLoader,time_column, value_column,save_dir):
-    data = data_loader.load_data()
-
-    # preprocess data
+def generate(data: DataFrame, time_column, value_column,save_dir='./visualization/images'):
     data[time_column] = pd.to_datetime(data[time_column], errors='coerce')
     data = data.sort_values(time_column)
-    print(data[value_column].describe())
 
     # Plots
     plotter = Plotter(data,time_column, value_column,save_dir)
@@ -31,6 +28,13 @@ def generate(data_loader: DataLoader,time_column, value_column,save_dir):
     plotter.plot_lag_plot()
 
 if __name__ == "__main__":
-    save_dir = "./image"
-    data_loader = CSVDataLoader(file_path="../../../raw_data/oxygen_sample.csv")
-    generate(data_loader=data_loader, time_column="time", value_column="Oxygen", save_dir=save_dir )
+    save_dir = "image"
+    time_column = "time"
+    value_column = "Oxygen"
+    CSV_file_path = "../../raw_data/oxygen_sample.csv"
+
+    data_loader = CSVDataLoader(file_path=CSV_file_path)
+    data = data_loader.load_data()
+    print(data[value_column].describe())
+
+    generate(df=data,time_column=time_column, value_column=value_column, save_dir=save_dir )
