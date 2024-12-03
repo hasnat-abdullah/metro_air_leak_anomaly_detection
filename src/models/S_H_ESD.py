@@ -17,7 +17,7 @@ Applications:
 - Monitoring seasonal metrics like sales or website traffic.
 - Detecting anomalies in environmental and sensor data.
 """
-
+import pandas as pd
 from pyculiarity import detect_ts
 from src.models.base_model import UnsupervisedModel
 
@@ -34,6 +34,14 @@ class SHESDModel(UnsupervisedModel):
     def predict(self, X):
         results = []
         for col in X.columns:
-            anomalies = detect_ts(X[col], alpha=self.alpha, max_anoms=self.max_anoms)
+            # Prepare the input DataFrame for detect_ts
+            df = pd.DataFrame({
+                'timestamp': X.index,
+                'value': X[col]
+            })
+            # Convert 'timestamp' to string before passing it to detect_ts
+            df['timestamp'] = df['timestamp'].astype(str)
+
+            anomalies = detect_ts(df, alpha=self.alpha, max_anoms=self.max_anoms)
             results.append(anomalies["anoms"].index)
         return results

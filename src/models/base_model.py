@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from enum import Enum
 
-from src.config import ModelType
-
+class ModelType(Enum):
+    UNSUPERVISED = "Unsupervised"
+    SUPERVISED = "Supervised"
+    SEMI_SUPERVISED = "Semi-Supervised"
 
 class BaseModel(ABC):
     """Base class for all models."""

@@ -15,7 +15,7 @@ def get_next_batch_code(results_dir) -> str:
     else:
         next_batch_number  = 1
 
-    return f' {(next_batch_number):03d}'
+    return f'{(next_batch_number):03d}'
 
 def create_result_output_folder(results_dir="results") -> str:
     batch_code = get_next_batch_code(results_dir)

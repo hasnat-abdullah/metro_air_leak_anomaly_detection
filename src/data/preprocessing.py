@@ -1,129 +1,87 @@
 import pandas as pd
-import numpy as np
-from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
-from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split
-from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif
-from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import StandardScaler
+
 
 class Preprocessor:
-    def __init__(self, target_column="_status", timestamp_column="_timestamp", n_features=10, use_smote=True):
-        self.target_column = target_column
-        self.timestamp_column = timestamp_column
-        self.scaler = None
-        self.pca = None
-        self.selector = None
-        self.n_features = n_features
-        self.use_smote = use_smote
+    def __init__(self, data: pd.DataFrame, time_column: str, value_column: str):
+        self.time_column = time_column
+        self.value_column = value_column
+        self.df = data
+        self.freq = None
 
-    def clean_data(self, df):
-        df = df.dropna()
-        df = df.drop_duplicates()
+    def infer_frequency(self) -> None:
+        time_deltas = self.df.index.to_series().diff().dropna()
+        self.freq = time_deltas.mode()[0]
+        print(f"Inferred frequency: {self.freq}")
 
-        return df
+    def handle_duplicates(self) -> None:
+        """Handles duplicate timestamps by aggregating values."""
+        if self.df.index.duplicated().any():
+            print("Handling duplicate timestamps...")
+            self.df = self.df.groupby(self.df.index).mean()
 
-    def engineer_features(self, df):
-        df = df.drop(columns=[self.timestamp_column])
+    def reindex_time_series(self) -> None:
+        if self.freq is None:
+            raise ValueError("Frequency must be inferred or set before reindexing.")
+        self.handle_duplicates()
+        full_index = pd.date_range(self.df.index.min(), self.df.index.max(), freq=self.freq)
+        self.df = self.df.reindex(full_index)
+        self.df = self.df.dropna()
 
-        # Example: Adding statistical features (moving averages, min, max, etc.)
-        for col in df.columns:
-            if df[col].dtype != 'object':  # Skip categorical columns
-                df[f'{col}_mean'] = df[col].rolling(window=10).mean()
-                df[f'{col}_std'] = df[col].rolling(window=10).std()
-                df[f'{col}_min'] = df[col].rolling(window=10).min()
-                df[f'{col}_max'] = df[col].rolling(window=10).max()
+    def drop_missing_values(self) -> None:
+        self.df = self.df.dropna()
 
-        df = df.dropna()  # Drop rows created by rolling operations that contain NaN
-        return df
+    def add_time_features(self) -> None:
+        self.df['hour'] = self.df.index.hour
+        self.df['weekday'] = self.df.index.weekday
 
-    def scale_features(self, X):
-        if self.scaler is None:
-            self.scaler = RobustScaler()
-            X_scaled = self.scaler.fit_transform(X)
-        else:
-            X_scaled = self.scaler.transform(X)
+    def add_rolling_features(self, window: int = 24) -> None:
+        self.df[f'rolling_mean_{window}'] = self.df[self.value_column].rolling(window=window).mean()
+        self.df[f'rolling_std_{window}'] = self.df[self.value_column].rolling(window=window).std()
 
-        # Convert back to DataFrame to preserve column names
-        X_scaled = pd.DataFrame(X_scaled, columns=X.columns, index=X.index)
+    def add_diff_features(self) -> None:
+        self.df['diff'] = self.df[self.value_column].diff()
 
-        # Shift all values to be non-negative (if required by chi2)
-        if (X_scaled < 0).any().any():
-            X_scaled += abs(X_scaled.min())  # Shift features to make all values non-negative
+    def scale_features(self) -> pd.DataFrame:
+        """
+        Scales the features using StandardScaler and ensures alignment of index and scaled data.
+        """
+        scaler = StandardScaler()
+        non_na_data = self.df.dropna()
+        scaled_data = scaler.fit_transform(non_na_data)
+        self.df = pd.DataFrame(scaled_data, index=non_na_data.index, columns=non_na_data.columns)
+        return self.df
 
-        return X_scaled
+    def convert_time_column_vale_to_datetime_type(self):
+        self.df[self.time_column] = pd.to_datetime(self.df[self.time_column])
 
-    def reduce_dimensionality(self, X, n_components=10):
-        if self.pca is None:
-            self.pca = PCA(n_components=n_components)
-            X_reduced = self.pca.fit_transform(X)
-        else:
-            X_reduced = self.pca.transform(X)
+    def set_index_by_time_column(self):
+        self.df.set_index(self.time_column, inplace=True)
 
-        return X_reduced
+    def preprocess(self) -> pd.DataFrame:
+        print("convert to datetime type...")
+        self.convert_time_column_vale_to_datetime_type()
+        print("set index by time column...")
+        self.set_index_by_time_column()
+        print("Inferring frequency...")
+        self.infer_frequency()
+        print("Reindexing time series...")
+        self.reindex_time_series()
+        print("Dropping missing values...")
+        self.drop_missing_values()
+        print("Adding time features...")
+        self.add_time_features()
+        print("Adding rolling features...")
+        self.add_rolling_features()
+        print("Adding diff features...")
+        self.add_diff_features()
+        print("Scaling features...")
+        self.scale_features()
+        print("Preprocessing complete.")
+        print(self.df)
+        print(self.df.columns)
+        return self.df
 
-    def select_features(self, X, y):
-        # Ensure X and y are consistent
-        if isinstance(X, pd.DataFrame):
-            X = X.values  # Convert to NumPy array if needed
-        if isinstance(y, pd.Series):
-            y = y.values
-
-        # Apply SelectKBest
-        if self.selector is None:
-            self.selector = SelectKBest(mutual_info_classif, k=self.n_features)
-            X_selected = self.selector.fit_transform(X, y)
-        else:
-            X_selected = self.selector.transform(X)
-
-        return X_selected
-
-    def balance_data(self, X_train, y_train):
-        if self.use_smote:
-            smote = SMOTE(random_state=42)
-            X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
-            return X_train_resampled, y_train_resampled
-        return X_train, y_train
-
-    def preprocess(self, df):
-        # Data Cleaning
-        df = self.clean_data(df)
-
-        # Separate features and target
-        y = df[self.target_column]
-        X = df.drop(columns=[self.target_column])
-
-        # Feature Engineering
-        X = self.engineer_features(X)
-
-        # Align `y` with the rows in `X` (handle rows dropped due to feature engineering)
-        y = y.loc[X.index]
-
-        # Feature Scaling
-        X_scaled = self.scale_features(X)
-
-        # Feature Selection
-        X_selected = self.select_features(X_scaled, y)
-
-        # Dimensionality Reduction
-        # X_reduced = self.reduce_dimensionality(X_selected)
-
-        # Split Data into Train and Test
-        X_train, X_test, y_train, y_test = train_test_split(
-            X_selected, y, test_size=0.2, random_state=42, stratify=y
-        )
-
-        # Handle class imbalance using SMOTE
-        X_train_balanced, y_train_balanced = self.balance_data(X_train, y_train)
-
-        return X_train_balanced, X_test, y_train_balanced, y_test
-
-
-if __name__ == "__main__":
-    # Load your dataset (replace this with your actual data loading code)
-    df = pd.read_csv('your_dataset.csv')
-
-    # Initialize Preprocessor
-    preprocessor = Preprocessor(target_column='_status', timestamp_column='_timestamp', n_features=10, use_smote=True)
-
-    # Preprocess the data
-    X_train, X_test, y_train, y_test = preprocessor.preprocess(df)
+    def save_preprocessed_data(self, output_path: str) -> None:
+        self.df.to_csv(output_path)
+        print(f"Preprocessed data saved to {output_path}")

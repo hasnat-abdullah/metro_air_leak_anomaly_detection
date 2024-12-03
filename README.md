@@ -1,7 +1,38 @@
 
-# Metro Air Leak Anomaly Detection Project
+# Universal Anomaly Detection and Predictive Modeling Framework
 
-This project focuses on detecting anomalies in air compressor data to support predictive maintenance. It uses a variety of machine learning algorithms including Isolation Forest, Autoencoder, LSTM etc for detecting potential failures based on sensor data collected over several months [[**Dataset**](https://archive.ics.uci.edu/dataset/791/metropt%2B3%2Bdataset)].
+This project provides a versatile framework for anomaly detection and predictive modeling across diverse datasets and domains. It includes implementations of various machine learning and statistical algorithms, enabling efficient data analysis, anomaly detection, and forecasting tasks.
+
+## Supported Algorithms for Anomaly Detection
+
+This table lists the available anomaly detection algorithms, categorized by type.
+
+| **Category**              | **Algorithm Name**          | **Description**                                                                 |
+|---------------------------|-----------------------------|---------------------------------------------------------------------------------|
+| **Statistical**           | ARIMA                      | A statistical model used for time series forecasting and anomaly detection.     |
+|                           | Mahalanobis Distance       | Detects anomalies based on the Mahalanobis distance metric.                     |
+|                           | SH-ESD                     | Seasonal Hybrid Extreme Studentized Deviate method for anomaly detection.       |
+| **Machine Learning**      | Isolation Forest           | Anomaly detection using the Isolation Forest algorithm.                         |
+|                           | K-Nearest Neighbors (KNN)  | Detects anomalies based on distance from nearest neighbors.                     |
+|                           | One-Class SVM              | A variant of SVM used for anomaly detection in single-class datasets.           |
+|                           | Random Cut Forest          | A tree-based model for anomaly detection in time series data.                   |
+|                           | XGBoost                    | A gradient boosting algorithm used for detecting anomalies in structured data.   |
+|                           | AdaBoost                   | A boosting algorithm used for detecting anomalies in data.                      |
+| **Clustering**            | K-Means                   | A clustering algorithm to identify outliers based on cluster distance.          |
+|                           | DBSCAN                     | Density-based spatial clustering algorithm for anomaly detection.               |
+|                           | Local Outlier Factor (LOF) | Identifies outliers by measuring the local density deviation.                   |
+| **Deep Learning**         | AutoEncoder               | A neural network used to detect anomalies by learning a compact representation. |
+|                           | LSTM Autoencoder           | Combines LSTM and Autoencoder for time series anomaly detection.                |
+|                           | VAE                        | Variational Autoencoder used for unsupervised anomaly detection.                |
+|                           | DeepAD                     | A deep learning-based anomaly detection method.                                 |
+|                           | TimeGAN                    | A generative adversarial network designed for time series anomaly detection.     |
+|                           | Deep Autoencoder           | A deeper variant of Autoencoder for complex anomaly detection.                  |
+| **Probabilistic Models**  | Gaussian Process           | Uses probabilistic modeling to detect anomalies in time series.                 |
+|                           | Bayesian Network           | A probabilistic graphical model for anomaly detection.                          |
+| **Time Series**           | Prophet                    | Forecasting algorithm used for time series anomaly detection.                   |
+|                           | Matrix Profile             | Uses matrix profiles for time series anomaly detection.                         |
+|                           | DTW                        | Dynamic Time Warping used for anomaly detection in time series.                 |
+| **Dimensionality Reduction** | Robust PCA              | A robust principal component analysis method for anomaly detection.             |
 
 ## Project Structure
 
@@ -10,7 +41,6 @@ metro_air_leak_anomaly_detection/
 ├── raw_data/                   # Raw data files (e.g., original CSV files)
 ├── src/                        # Source code for the project
 │   ├── init.py                 # Init file for package recognition
-│   ├── config.py               # Configuration file for global parameters (e.g., path, postgres cred)
 │   ├── data                    # Data loading and preprocessing functions
 │   │   ├── init.py
 │   │   ├── loader.py           # load data from postgres or somewhere else
@@ -27,12 +57,18 @@ metro_air_leak_anomaly_detection/
 │   │   │   ├── models          # store all trained models as '.pkl' fromat
 │   │   │   │   ├── {model_name}_model.pkl          # trained model as '.pkl' fromat
 │   │   │   ├── reports.csv     # performance metrices of all trained models as csv file
-│   └── utils.py                # helper functions
-│   │   ├── {file_name}.py      # helper functions to reuse and keep the main functions clean
-│   └── main.py                 # Main script to execute the pipeline end-to-end
+│   ├── utils.py                # helper functions
+│   │   └── {file_name}.py      # helper functions to reuse and keep the main functions clean
+│   ├── visualization           # data visualization
+│   │   ├── init.py
+│   │   └── plotter.py          # class to generate graph/plot
+│   ├── generate_plots.py       # Main script to execute end-to-end model data plot/graph
+│   └── train_models.py         # Main script to execute end-to-end model training
 ├── tests/                      # Unit tests and integration tests
 ├── scripts/                    # Scripts for specific tasks (e.g., produce data by kafka etc)
 ├── logs/                       # different level of application log
+├── config.py                   # Configuration file for global parameters (e.g., path, postgres cred)
+├── main.py                     # Main script to execute end-to-end pipeline
 ├── requirements.txt            # Required libraries and dependencies
 ├── README.md                   # Project overview, setup, and instructions
 └── .gitignore                  # Git ignore file for unnecessary files
@@ -77,7 +113,7 @@ Ensure paths and model parameters are correct in the configuration file.
 #### 5. Run the Pipeline
 
 ```bash
-python src/main.py
+python main.py
 ```
 
 

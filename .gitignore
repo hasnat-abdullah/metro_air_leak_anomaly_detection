@@ -59,3 +59,4 @@ src/results/
 *.key
 
 /src/visualization/images/
+/plot_images/

@@ -11,24 +11,27 @@ And yes, we’ll even save those masterpieces because, you know, who wants to lo
 Happy plotting, and remember—data never lies (unless it's an outlier).
 """
 
-import os
 import logging
-import pandas as pd
+import os
+import warnings
+
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
-from statsmodels.tsa.seasonal import seasonal_decompose
 from pandas.plotting import lag_plot
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 from src.utils.others import track_execution_time
 
+# Suppress specific warning
+warnings.filterwarnings("ignore", message='Creating legend with loc="best" can be slow with large amounts of data.')
 # Setting up a logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
 class Plotter:
-    def __init__(self, data: pd.DataFrame, time_column: str = 'time', value_column: str = 'Oxygen',
-                 save_dir: str = './images'):
+    def __init__(self, data: pd.DataFrame, time_column: str, value_column: str, save_dir: str):
         self.data = data
         self.time_column = time_column
         self.value_column = value_column
