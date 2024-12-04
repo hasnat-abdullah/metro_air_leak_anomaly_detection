@@ -20,7 +20,7 @@ from .lof import LOFModel
 from .lstm import LSTMModel
 from .mahalanobis import MahalanobisModel
 from .one_class_SVM import OneClassSVMModel
-from .prophet import ProphetModel
+from .PROPHET import ProphetModel
 from .random_cut_forest import RandomCutForest
 from .random_forest import RandomForestModel
 from .rpca import RPCA
