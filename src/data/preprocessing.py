@@ -58,11 +58,18 @@ class Preprocessor:
     def set_index_by_time_column(self):
         self.df.set_index(self.time_column, inplace=True)
 
+    def filter_to_time_and_value(self) -> None:
+        """Retains only the time and value columns in the DataFrame."""
+        print("Filtering to only time and value columns...")
+        self.df = self.df[[self.value_column]]
+        self.df.reset_index(inplace=True)
+        self.df.rename(columns={"index": self.time_column}, inplace=True)
+
     def preprocess(self) -> pd.DataFrame:
         print("convert to datetime type...")
-        self.convert_time_column_vale_to_datetime_type()
+        # self.convert_time_column_vale_to_datetime_type()
         print("set index by time column...")
-        self.set_index_by_time_column()
+        # self.set_index_by_time_column()
         print("Inferring frequency...")
         self.infer_frequency()
         print("Reindexing time series...")
@@ -78,7 +85,9 @@ class Preprocessor:
         print("Scaling features...")
         self.scale_features()
         print("Preprocessing complete.")
-        print(self.df)
+        # print(self.df)
+        print("Filtering to time and value columns...")
+        self.filter_to_time_and_value()
         print(self.df.columns)
         return self.df
 

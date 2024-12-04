@@ -19,32 +19,32 @@ def train(data: pd.DataFrame, time_column, value_column):
 
     # -------- Anomaly detection models to train --------
     models = {
-        # "Isolation Forest": IsolationForestModel(contamination=0.01),
-        # "AutoEncoder": AutoEncoder(input_dim=data.shape[1]),
-        # "One-Class SVM": OneClassSVMModel(kernel="rbf", nu=0.05),
-        # "LODA": LODAModel(n_bins=10),
-        # "LSTM": LSTMModel(input_dim=data.shape[1]),
-        # "Mahalanobis Distance": MahalanobisModel(),
-        # "KNN": KNNModel(),
-        # "Random Cut Forest": RandomCutForest(),
-        # "DBSCAN": DBSCANModel(eps=0.3, min_samples=10),
-        # "Local Outlier Factor": LOFModel(n_neighbors=20),
-        # "Deep AutoEncoder": DeepAutoEncoder(input_dim=data.shape[1]),
-        # "Variational Autoencoder": VAEModel(input_dim=data.shape[1]),
-        # "Gaussian Mixture Model": GMMModel(n_components=2),
-        # "Robust PCA": RPCA(),
-        # "K-Means": KMeansModel(n_clusters=2),
-        # "LSTM Autoencoder": LSTMAutoencoder(input_dim=10, timesteps=5, latent_dim=3),
-        # "S-H-ESD": SHESDModel(alpha=0.05),
+        "Isolation Forest": IsolationForestModel(contamination=0.01),
+        "AutoEncoder": AutoEncoder(input_dim=data.shape[1]),
+        "One-Class SVM": OneClassSVMModel(kernel="rbf", nu=0.05),
+        "LODA": LODAModel(n_bins=10),
+        "LSTM": LSTMModel(input_dim=data.shape[1]),
+        "Mahalanobis Distance": MahalanobisModel(),
+        "KNN": KNNModel(),
+        "Random Cut Forest": RandomCutForest(),
+        "DBSCAN": DBSCANModel(eps=0.3, min_samples=10),
+        "Local Outlier Factor": LOFModel(n_neighbors=20),
+        "Deep AutoEncoder": DeepAutoEncoder(input_dim=data.shape[1]),
+        "Variational Autoencoder": VAEModel(input_dim=data.shape[1]),
+        "Gaussian Mixture Model": GMMModel(n_components=2),
+        "Robust PCA": RPCA(),
+        "K-Means": KMeansModel(n_clusters=2),
+        "LSTM Autoencoder": LSTMAutoencoder(input_dim=10, timesteps=5, latent_dim=3),
+        "S-H-ESD": SHESDModel(alpha=0.05),
         "TimeGAN": TimeGAN(),
-        # "DeepAD": DeepAD(input_dim=10),
-        # "Bayesian Network": BayesianNetworkModel(),
-        # "Gaussian Process": GaussianProcessModel(),
+        "DeepAD": DeepAD(input_dim=10),
+        "Bayesian Network": BayesianNetworkModel(),
+        "Gaussian Process": GaussianProcessModel(),
         "Prophet": ProphetModel(),
-        # "DTW": DTWModel(reference_series=[1, 2, 3]),
-        # "Matrix Profile": MatrixProfileModel(window_size=10),
-        # "AdaBoost": AdaBoostModel(n_estimators=100),
-        # "Arima": ARIMAModel(),
+        "DTW": DTWModel(reference_series=[1, 2, 3]),
+        "Matrix Profile": MatrixProfileModel(window_size=10),
+        "AdaBoost": AdaBoostModel(n_estimators=100),
+        "Arima": ARIMAModel(),
     }
 
     # -------- trained model evaluation --------
@@ -101,6 +101,18 @@ if __name__ == "__main__":
     # -------- Import data from CSV --------
     data_loader = CSVDataLoader(file_path=CSV_FILE_PATH, usecols=[TIME_COLUMN, VALUE_COLUMN]) # import only time_column and value_column
     data = data_loader.load_data()
+
+    # SAMPLE DATA
+    data["time"] = pd.to_datetime(data["time"])
+    data.set_index("time", inplace=True)
+    start_time = "2023-12-01 00:00:00"
+    end_time = "2024-02-29 04:55:02"
+    filtered_df = data.loc[start_time:end_time]
+    # Step 2: Resample to one row per minute (mean for numerical values)
+    print(len(filtered_df))
+    resampled_df = filtered_df.resample("10T").mean().dropna()
+    data=resampled_df
+    print(len(resampled_df))
 
     train(data=data, time_column=TIME_COLUMN, value_column=VALUE_COLUMN)
 

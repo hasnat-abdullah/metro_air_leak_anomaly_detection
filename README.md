@@ -6,7 +6,7 @@ This project provides a versatile framework for anomaly detection and predictive
 ## Supported Algorithms for Anomaly Detection
 
 This table lists the available anomaly detection algorithms, categorized by type.
-
+```
 | **Category**              | **Algorithm Name**          | **Description**                                                                 |
 |---------------------------|-----------------------------|---------------------------------------------------------------------------------|
 | **Statistical**           | ARIMA                      | A statistical model used for time series forecasting and anomaly detection.     |
@@ -33,6 +33,7 @@ This table lists the available anomaly detection algorithms, categorized by type
 |                           | Matrix Profile             | Uses matrix profiles for time series anomaly detection.                         |
 |                           | DTW                        | Dynamic Time Warping used for anomaly detection in time series.                 |
 | **Dimensionality Reduction** | Robust PCA              | A robust principal component analysis method for anomaly detection.             |
+```
 
 ## Project Structure
 
