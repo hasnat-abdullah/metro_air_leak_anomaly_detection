@@ -56,7 +56,7 @@ class ProphetModel:
     def plot_residuals(self, forecast: pd.DataFrame, test: pd.DataFrame):
         """Plot residuals (actual - predicted)."""
         test = test.merge(forecast[['ds', 'yhat']], on='ds')
-        residuals = test['y'] - test['yhat']
+        residuals = test['y'] - test['yhat_x']
         plt.figure(figsize=(10, 6))
         plt.plot(test['ds'], residuals, color='red')
         plt.axhline(y=0, color='black', linestyle='--')
@@ -68,7 +68,7 @@ class ProphetModel:
     def plot_anomalies(self, forecast: pd.DataFrame, test: pd.DataFrame, threshold: float):
         """Visualize anomalies based on residuals."""
         test = test.merge(forecast[['ds', 'yhat']], on='ds')
-        residuals = test['y'] - test['yhat']
+        residuals = test['y'] - test['yhat_x']
         anomalies = residuals.abs() > threshold
         plt.figure(figsize=(10, 6))
         plt.plot(test['ds'], test['y'], label='Actual', color='blue')
@@ -92,9 +92,9 @@ class ProphetModel:
         # Calculate metrics
         mae = mean_absolute_error(test['y'], test['yhat'])
         rmse = np.sqrt(mean_squared_error(test['y'], test['yhat']))
-
         print(f"MAE: {mae}")
         print(f"RMSE: {rmse}")
+
 
         # Visualizations
         self.plot_forecast(forecast, test)
@@ -124,14 +124,9 @@ class ProphetModel:
 
 
 if __name__ == "__main__":
-    # Example time series data
-    # df = pd.DataFrame({
-    #     'ds': pd.date_range(start='2023-01-01', periods=100, freq='D'),
-    #     'y': np.sin(np.linspace(0, 10, 100)) + np.random.normal(0, 0.1, 100)  # Simulated data
-    # })
     from src.utils.get_data import get_data
-    data = get_data()
-    data.rename(columns={"time": "ds", "Oxygen": "y"})
+    data = get_data(one_data_in_x_minutes="1T")
+    data = data.rename(columns={"time": "ds", "Oxygen": "y"})
     prophet_model = ProphetModel()
     # Run the pipeline
     evaluation_results = prophet_model.run_pipeline(data)
