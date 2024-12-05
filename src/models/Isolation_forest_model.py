@@ -28,16 +28,87 @@ Applications:
 - **Regression**: It is also used for regression tasks, such as predicting house prices, stock market trends, and demand forecasting.
 - **Feature Importance**: Random Forest can be used to assess the importance of different features in making predictions, which is useful in feature selection and understanding the dataset.
 """
+import pandas as pd
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+import matplotlib.pyplot as plt
 
-from sklearn.ensemble import RandomForestClassifier
-from .base_model import SupervisedModel
 
-class RandomForestModel(SupervisedModel):
-    def __init__(self, n_estimators=100):
-        self.model = RandomForestClassifier(n_estimators=n_estimators, random_state=42)
+class IsolationForestModel:
+    def __init__(self, n_estimators=100, contamination=0.05):
+        self.model = IsolationForest(n_estimators=n_estimators, contamination=contamination, random_state=42)
+        self.scaler = StandardScaler()
 
-    def train(self, X_train, y_train):
-        self.model.fit(X_train, y_train)
+    def preprocess_data(self, df):
+        """Preprocess the data by extracting time features and scaling oxygen levels."""
+        # Convert 'time' to datetime and extract additional features like hour of day
+        df['time'] = pd.to_datetime(df['time'])
+        df['hour'] = df['time'].dt.hour
+        df['day_of_week'] = df['time'].dt.dayofweek
 
-    def predict(self, X_test):
-        return self.model.predict_proba(X_test)[:, 1]  # Probability scores
+        # Use only 'Oxygen' and the time features for prediction
+        X = df[['hour', 'day_of_week', 'Oxygen']]
+
+        # Scale features
+        X_scaled = self.scaler.fit_transform(X)
+
+        return X_scaled
+
+    def train(self, X):
+        """Train the Isolation Forest model."""
+        print("Training Isolation Forest model...")
+        # Fit the model without labels (unsupervised training)
+        self.model.fit(X)
+        print(f"Model trained with contamination ratio: {self.model.contamination}")
+
+    def predict_anomalies(self, X):
+        """Predict anomalies using Isolation Forest model."""
+        print("Predicting anomalies...")
+        # Predict anomalies: -1 for anomalies, 1 for normal points
+        anomaly_labels = self.model.predict(X)
+        anomalies = anomaly_labels == -1
+        anomaly_scores = self.model.decision_function(X)
+        return anomalies, anomaly_scores
+
+    def visualize_anomalies(self, df, anomalies):
+        """Visualize the anomalies on the time vs Oxygen plot."""
+        plt.figure(figsize=(10, 6))
+        plt.scatter(df['time'], df['Oxygen'], c=anomalies, cmap='coolwarm', marker='o')
+        plt.xlabel('Time')
+        plt.ylabel('Oxygen')
+        plt.title('Anomaly Detection using Isolation Forest')
+        plt.colorbar(label='Anomaly (1) or Normal (0)')
+        plt.show()
+
+    def run_pipeline(self, df):
+        """Run the full anomaly detection pipeline."""
+        X_scaled = self.preprocess_data(df)
+
+        # Train the Isolation Forest model
+        self.train(X_scaled)
+
+        # Predict anomalies
+        anomalies, anomaly_scores = self.predict_anomalies(X_scaled)
+
+        # Add the anomaly column to the dataframe
+        df['anomaly'] = anomalies
+
+        # Visualize the anomalies
+        self.visualize_anomalies(df, anomalies)
+
+        return df, anomalies, anomaly_scores
+
+
+# Usage
+if __name__ == "__main__":
+    from src.utils.get_data import get_data
+
+    data = get_data("1T")
+
+    rf_model = IsolationForestModel(n_estimators=100, contamination=0.05)
+    result_df, anomalies, anomaly_scores = rf_model.run_pipeline(data)
+
+    # Output results
+    print(f"Detected anomalies: {sum(anomalies)}")
+    print(result_df.head())
