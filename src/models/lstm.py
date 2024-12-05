@@ -30,30 +30,118 @@ Applications:
 - **Natural Language Processing (NLP)**: LSTMs are used in NLP tasks such as language translation, speech recognition, and sentiment analysis.
 """
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+import pandas as pd
 import numpy as np
-from .base_model import UnsupervisedModel
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+import matplotlib.pyplot as plt
 
-class LSTMModel(UnsupervisedModel):
-    def __init__(self, input_dim, time_steps=10, latent_dim=64):
-        self.time_steps = time_steps
-        self.model = Sequential([
-            LSTM(latent_dim, activation="relu", input_shape=(time_steps, input_dim), return_sequences=False),
-            Dense(input_dim)
-        ])
-        self.model.compile(optimizer="adam", loss="mse")
+class LSTMAnomalyDetection:
+    def __init__(self, seq_length=10, dropout=0.2, epochs=50, batch_size=32):
+        self.seq_length = seq_length
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.scaler = MinMaxScaler()
+        self.model = None
+        self.dropout = dropout
 
-    def _reshape_data(self, X):
-        """Reshape data for LSTM input."""
-        n_samples = X.shape[0] - self.time_steps + 1
-        return np.array([X[i:i + self.time_steps] for i in range(n_samples)])
+    def preprocess_data(self, df):
+        """Preprocess the data by scaling and creating sequences."""
+        # Scale Oxygen values
+        df['Oxygen_scaled'] = self.scaler.fit_transform(df[['Oxygen']])
 
-    def train(self, X_train):
-        X_train_reshaped = self._reshape_data(X_train)
-        self.model.fit(X_train_reshaped, X_train[self.time_steps - 1:], epochs=10, batch_size=128, verbose=0)
+        # Create sequences for LSTM
+        sequences = []
+        for i in range(len(df) - self.seq_length):
+            seq = df['Oxygen_scaled'].iloc[i:i + self.seq_length].values
+            sequences.append(seq)
 
-    def predict(self, X_test):
-        X_test_reshaped = self._reshape_data(X_test)
-        reconstructions = self.model.predict(X_test_reshaped)
-        return np.mean((X_test[self.time_steps - 1:] - reconstructions) ** 2, axis=1)  # Reconstruction error
+        sequences = np.array(sequences)
+        return sequences
+
+    def build_model(self):
+        """Build the LSTM model."""
+        model = Sequential()
+        model.add(LSTM(64, input_shape=(self.seq_length, 1), return_sequences=True))
+        model.add(Dropout(self.dropout))
+        model.add(LSTM(32, return_sequences=False))
+        model.add(Dropout(self.dropout))
+        model.add(Dense(1))
+        model.compile(optimizer='adam', loss='mse')
+        self.model = model
+
+    def train(self, sequences):
+        """Train the LSTM model."""
+        print("Training LSTM model...")
+        self.model.fit(
+            sequences[:, :-1, np.newaxis],  # Features
+            sequences[:, -1],  # Target
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            validation_split=0.2,
+            verbose=2
+        )
+        print("Model training completed.")
+
+    def predict_anomalies(self, sequences):
+        """Predict anomalies using the trained LSTM model."""
+        predictions = self.model.predict(sequences[:, :-1, np.newaxis])
+        mse = np.mean((predictions - sequences[:, -1])**2, axis=1)
+
+        # Define anomalies based on a threshold (e.g., 3 standard deviations above the mean MSE)
+        threshold = np.mean(mse) + 3 * np.std(mse)
+        anomalies = mse > threshold
+        return anomalies, mse, threshold
+
+    def visualize_anomalies(self, df, anomalies, anomaly_scores, threshold):
+        """Visualize anomalies on the time vs. Oxygen plot."""
+        plt.figure(figsize=(10, 6))
+        plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
+        plt.scatter(
+            df['time'][anomalies],
+            df['Oxygen'][anomalies],
+            label='Anomalies',
+            color='red'
+        )
+        plt.axhline(y=threshold, color='green', linestyle='--', label='Anomaly Threshold')
+        plt.xlabel('Time')
+        plt.ylabel('Oxygen')
+        plt.title('Anomaly Detection using LSTM')
+        plt.legend()
+        plt.show()
+
+    def run_pipeline(self, df):
+        """Run the LSTM anomaly detection pipeline."""
+        sequences = self.preprocess_data(df)
+
+        # Build and train the model
+        self.build_model()
+        self.train(sequences)
+
+        # Predict anomalies
+        anomalies, anomaly_scores, threshold = self.predict_anomalies(sequences)
+
+        # Add anomaly scores to the original dataframe
+        df = df.iloc[self.seq_length:].reset_index(drop=True)
+        df['anomaly_score'] = anomaly_scores
+        df['anomaly'] = anomalies
+
+        # Visualize anomalies
+        self.visualize_anomalies(df, anomalies, anomaly_scores, threshold)
+
+        return df, anomalies, anomaly_scores
+
+
+# Usage
+if __name__ == "__main__":
+    # Assuming 'data' is your dataframe
+    from src.utils.get_data import get_data
+    data = get_data("10T")  # Replace with your actual data source
+
+    lstm_model = LSTMAnomalyDetection(seq_length=10, epochs=50, batch_size=32)
+    result_df, anomalies, anomaly_scores = lstm_model.run_pipeline(data)
+
+    # Output results
+    print(f"Detected anomalies: {sum(anomalies)}")
+    print(result_df.head())

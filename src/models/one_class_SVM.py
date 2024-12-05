@@ -29,15 +29,79 @@ Applications:
 - **Time Series Anomaly Detection**: One-Class SVM can also be applied in time series analysis to detect anomalous behaviors or deviations from normal trends over time.
 """
 
+import pandas as pd
+import numpy as np
 from sklearn.svm import OneClassSVM
-from .base_model import UnsupervisedModel
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
 
-class OneClassSVMModel(UnsupervisedModel):
-    def __init__(self, kernel="rbf", nu=0.05):
-        self.model = OneClassSVM(kernel=kernel, nu=nu)
 
-    def train(self, X_train):
-        self.model.fit(X_train)
+class OneClassSVMAnomalyDetection:
+    def __init__(self, kernel='rbf', nu=0.05, gamma='scale'):
+        self.kernel = kernel
+        self.nu = nu
+        self.gamma = gamma
+        self.scaler = MinMaxScaler()
+        self.model = OneClassSVM(kernel=self.kernel, nu=self.nu, gamma=self.gamma)
 
-    def predict(self, X_test):
-        return -self.model.decision_function(X_test)  # Scores
+    def preprocess_data(self, df):
+        """Scale the data for One-Class SVM."""
+        df['Oxygen_scaled'] = self.scaler.fit_transform(df[['Oxygen']])
+        return df[['Oxygen_scaled']].values
+
+    def train(self, X):
+        """Train the One-Class SVM model."""
+        print("Training One-Class SVM model...")
+        self.model.fit(X)
+        print("Model training completed.")
+
+    def predict_anomalies(self, X):
+        """Predict anomalies using the trained model."""
+        predictions = self.model.predict(X)
+        anomaly_scores = self.model.decision_function(X)
+        # Anomalies are labeled as -1
+        anomalies = predictions == -1
+        return anomalies, anomaly_scores
+
+    def visualize_anomalies(self, df, anomalies):
+        """Visualize anomalies on the time vs. Oxygen plot."""
+        plt.figure(figsize=(10, 6))
+        plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
+        plt.scatter(
+            df['time'][anomalies],
+            df['Oxygen'][anomalies],
+            label='Anomalies',
+            color='red'
+        )
+        plt.xlabel('Time')
+        plt.ylabel('Oxygen')
+        plt.title('Anomaly Detection using One-Class SVM')
+        plt.legend()
+        plt.show()
+
+    def run_pipeline(self, df):
+        """Run the One-Class SVM anomaly detection pipeline."""
+        # Preprocess data
+        X = self.preprocess_data(df)
+
+        self.train(X)
+        anomalies, anomaly_scores = self.predict_anomalies(X)
+
+        df['anomaly_score'] = anomaly_scores
+        df['anomaly'] = anomalies
+
+        self.visualize_anomalies(df, anomalies)
+
+        return df, anomalies, anomaly_scores
+
+
+# Usage
+if __name__ == "__main__":
+    from src.utils.get_data import get_data
+
+    data = get_data("")
+    svm_model = OneClassSVMAnomalyDetection(nu=0.05, gamma='scale')
+    result_df, anomalies, anomaly_scores = svm_model.run_pipeline(data)
+
+    print(f"Detected anomalies: {sum(anomalies)}")
+    print(result_df.head())

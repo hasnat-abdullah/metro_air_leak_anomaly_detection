@@ -15,8 +15,9 @@ def get_data(one_data_in_x_minutes=""):
     start_time = "2023-12-01 00:00:00"
     end_time = "2024-02-29 04:55:02"
     data = data.loc[start_time:end_time]
-    # Step 2: Resample to one row per minute (mean for numerical values)
-    data = data.resample(one_data_in_x_minutes).mean().dropna()
+    if one_data_in_x_minutes:
+        # Step 2: Resample to one row per minute (mean for numerical values)
+        data = data.resample(one_data_in_x_minutes).mean().dropna()
     print(len(data))
     data.reset_index(inplace=True)
     data.rename(columns={"index": 'time'}, inplace=True)

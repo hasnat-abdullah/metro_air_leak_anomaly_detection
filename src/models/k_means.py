@@ -43,18 +43,91 @@ Variants:
 K-Means is widely used for clustering problems due to its simplicity and efficiency, though its performance can degrade if the clusters have complex shapes or if the data contains significant outliers.
 """
 
+import pandas as pd
+import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import euclidean_distances
+import matplotlib.pyplot as plt
 
-from src.models.base_model import UnsupervisedModel
 
-
-class KMeansModel(UnsupervisedModel):
-    def __init__(self, n_clusters=2):
+class KMeansAnomalyDetection:
+    def __init__(self, n_clusters=3):
         self.n_clusters = n_clusters
-        self.model = KMeans(n_clusters=self.n_clusters)
+        self.scaler = MinMaxScaler()
+        self.kmeans = None
+        self.threshold = None
+
+    def preprocess_data(self, df):
+        """Scale the data for K-Means."""
+        df['Oxygen_scaled'] = self.scaler.fit_transform(df[['Oxygen']])
+        return df[['Oxygen_scaled']].values
 
     def train(self, X):
-        self.model.fit(X)
+        """Train the K-Means model and calculate the distance threshold for anomalies."""
+        print("Training K-Means model...")
+        self.kmeans = KMeans(n_clusters=self.n_clusters, random_state=42)
+        self.kmeans.fit(X)
+        print("Model training completed.")
 
-    def predict(self, X):
-        return self.model.predict(X)
+        # Calculate distances of all points to their closest cluster center
+        distances = euclidean_distances(X, self.kmeans.cluster_centers_).min(axis=1)
+        # Define threshold as the mean + 3 standard deviations
+        self.threshold = distances.mean() + 3 * distances.std()
+        print(f"Anomaly detection threshold: {self.threshold}")
+
+    def predict_anomalies(self, X):
+        """Predict anomalies based on the distance threshold."""
+        distances = euclidean_distances(X, self.kmeans.cluster_centers_).min(axis=1)
+        anomalies = distances > self.threshold
+        return anomalies, distances
+
+    def visualize_anomalies(self, df, anomalies, anomaly_scores):
+        """Visualize anomalies on the time vs. Oxygen plot."""
+        plt.figure(figsize=(10, 6))
+        plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
+        plt.scatter(
+            df['time'][anomalies],
+            df['Oxygen'][anomalies],
+            label='Anomalies',
+            color='red'
+        )
+        plt.xlabel('Time')
+        plt.ylabel('Oxygen')
+        plt.title('Anomaly Detection using K-Means')
+        plt.legend()
+        plt.show()
+
+    def run_pipeline(self, df):
+        """Run the K-Means anomaly detection pipeline."""
+        # Preprocess data
+        X = self.preprocess_data(df)
+
+        # Train the K-Means model
+        self.train(X)
+
+        # Predict anomalies
+        anomalies, anomaly_scores = self.predict_anomalies(X)
+
+        # Add anomaly information to the original dataframe
+        df['anomaly_score'] = anomaly_scores
+        df['anomaly'] = anomalies
+
+        # Visualize anomalies
+        self.visualize_anomalies(df, anomalies, anomaly_scores)
+
+        return df, anomalies, anomaly_scores
+
+
+# Usage
+if __name__ == "__main__":
+    # Assuming 'data' is your dataframe
+    from src.utils.get_data import get_data
+    data = get_data("1T")  # Replace with your actual data source
+
+    kmeans_model = KMeansAnomalyDetection(n_clusters=3)
+    result_df, anomalies, anomaly_scores = kmeans_model.run_pipeline(data)
+
+    # Output results
+    print(f"Detected anomalies: {sum(anomalies)}")
+    print(result_df.head())

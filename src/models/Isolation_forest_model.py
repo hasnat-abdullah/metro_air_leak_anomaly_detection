@@ -31,7 +31,6 @@ Applications:
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
-import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -42,15 +41,10 @@ class IsolationForestModel:
 
     def preprocess_data(self, df):
         """Preprocess the data by extracting time features and scaling oxygen levels."""
-        # Convert 'time' to datetime and extract additional features like hour of day
         df['time'] = pd.to_datetime(df['time'])
         df['hour'] = df['time'].dt.hour
         df['day_of_week'] = df['time'].dt.dayofweek
-
-        # Use only 'Oxygen' and the time features for prediction
         X = df[['hour', 'day_of_week', 'Oxygen']]
-
-        # Scale features
         X_scaled = self.scaler.fit_transform(X)
 
         return X_scaled
@@ -58,7 +52,6 @@ class IsolationForestModel:
     def train(self, X):
         """Train the Isolation Forest model."""
         print("Training Isolation Forest model...")
-        # Fit the model without labels (unsupervised training)
         self.model.fit(X)
         print(f"Model trained with contamination ratio: {self.model.contamination}")
 
@@ -84,17 +77,9 @@ class IsolationForestModel:
     def run_pipeline(self, df):
         """Run the full anomaly detection pipeline."""
         X_scaled = self.preprocess_data(df)
-
-        # Train the Isolation Forest model
         self.train(X_scaled)
-
-        # Predict anomalies
         anomalies, anomaly_scores = self.predict_anomalies(X_scaled)
-
-        # Add the anomaly column to the dataframe
         df['anomaly'] = anomalies
-
-        # Visualize the anomalies
         self.visualize_anomalies(df, anomalies)
 
         return df, anomalies, anomaly_scores
@@ -105,10 +90,8 @@ if __name__ == "__main__":
     from src.utils.get_data import get_data
 
     data = get_data("1T")
-
     rf_model = IsolationForestModel(n_estimators=100, contamination=0.05)
     result_df, anomalies, anomaly_scores = rf_model.run_pipeline(data)
 
-    # Output results
     print(f"Detected anomalies: {sum(anomalies)}")
     print(result_df.head())
