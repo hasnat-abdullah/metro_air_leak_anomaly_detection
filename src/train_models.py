@@ -46,6 +46,8 @@ def train(data: pd.DataFrame, time_column, value_column):
             print(ex)
             traceback.print_exc()
             return
+    print("\n-------Models Saved directory-------")
+    print(output_folder+"/models/\n")
     print("-------Execution Time-------")
     print(pd.DataFrame(list(model_execution_time.items()), columns=['Model Name', 'Execution Time']))
 
