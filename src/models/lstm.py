@@ -37,24 +37,29 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 import matplotlib.pyplot as plt
 
+from config import TIME_COLUMN, VALUE_COLUMN
+
+
 class LSTMModel:
-    def __init__(self, seq_length=10, dropout=0.2, epochs=50, batch_size=32):
+    def __init__(self,time_column, value_column, seq_length=10, dropout=0.2, epochs=50, batch_size=32):
         self.seq_length = seq_length
         self.epochs = epochs
         self.batch_size = batch_size
         self.scaler = MinMaxScaler()
         self.model = None
         self.dropout = dropout
+        self.time_column = time_column
+        self.value_column = value_column
 
     def preprocess_data(self, df):
         """Preprocess the data by scaling and creating sequences."""
         # Scale Oxygen values
-        df['Oxygen_scaled'] = self.scaler.fit_transform(df[['Oxygen']])
+        df[f'{self.value_column}_scaled'] = self.scaler.fit_transform(df[[self.value_column]])
 
         # Create sequences for LSTM
         sequences = []
         for i in range(len(df) - self.seq_length):
-            seq = df['Oxygen_scaled'].iloc[i:i + self.seq_length].values
+            seq = df[f'{self.value_column}_scaled'].iloc[i:i + self.seq_length].values
             sequences.append(seq)
 
         sequences = np.array(sequences)
@@ -97,21 +102,21 @@ class LSTMModel:
     def visualize(self, df, anomalies, anomaly_scores, threshold):
         """Visualize anomalies on the time vs. Oxygen plot."""
         plt.figure(figsize=(10, 6))
-        plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
+        plt.plot(df[self.time_column], df[self.value_column], label=self.value_column, color='blue')
         plt.scatter(
-            df['time'][anomalies],
-            df['Oxygen'][anomalies],
+            df[self.time_column][anomalies],
+            df[self.value_column][anomalies],
             label='Anomalies',
             color='red'
         )
         plt.axhline(y=threshold, color='green', linestyle='--', label='Anomaly Threshold')
-        plt.xlabel('Time')
-        plt.ylabel('Oxygen')
+        plt.xlabel(self.time_column)
+        plt.ylabel(self.value_column)
         plt.title('Anomaly Detection using LSTM')
         plt.legend()
         plt.show()
 
-    def run_pipeline(self, df):
+    def run_pipeline(self, df, time_column, value_column):
         """Run the LSTM anomaly detection pipeline."""
         sequences = self.preprocess_data(df)
 
@@ -129,7 +134,7 @@ class LSTMModel:
 
         # Visualize anomalies
         self.visualize(df, anomalies, anomaly_scores, threshold)
-
+        print(f"Detected anomalies: {sum(anomalies)}")
         return df, anomalies, anomaly_scores
 
 
@@ -139,9 +144,8 @@ if __name__ == "__main__":
     from src.utils.get_data import get_data
     data = get_data("10T")  # Replace with your actual data source
 
-    lstm_model = LSTMModel(seq_length=10, epochs=50, batch_size=32)
-    result_df, anomalies, anomaly_scores = lstm_model.run_pipeline(data)
+    lstm_model = LSTMModel(time_column=TIME_COLUMN, value_column=VALUE_COLUMN, seq_length=10, epochs=50, batch_size=32)
+    result_df, anomalies, anomaly_scores = lstm_model.run_pipeline(data, TIME_COLUMN, VALUE_COLUMN)
 
     # Output results
-    print(f"Detected anomalies: {sum(anomalies)}")
     print(result_df.head())

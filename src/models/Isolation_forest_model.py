@@ -33,18 +33,22 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 
+from config import TIME_COLUMN, VALUE_COLUMN
+
 
 class IsolationForestModel:
-    def __init__(self, n_estimators=100, contamination=0.05):
+    def __init__(self,time_column, value_column, n_estimators=100, contamination=0.05):
+        self.time_column = time_column
+        self.value_column = value_column
         self.model = IsolationForest(n_estimators=n_estimators, contamination=contamination, random_state=42)
         self.scaler = StandardScaler()
 
     def preprocess_data(self, df):
-        """Preprocess the data by extracting time features and scaling oxygen levels."""
-        df['time'] = pd.to_datetime(df['time'])
-        df['hour'] = df['time'].dt.hour
-        df['day_of_week'] = df['time'].dt.dayofweek
-        X = df[['hour', 'day_of_week', 'Oxygen']]
+        """Preprocess the data by extracting time features and scaling value_column levels."""
+        df[self.time_column] = pd.to_datetime(df[self.time_column])
+        df['hour'] = df[self.time_column].dt.hour
+        df['day_of_week'] = df[self.time_column].dt.dayofweek
+        X = df[['hour', 'day_of_week', self.value_column]]
         X_scaled = self.scaler.fit_transform(X)
 
         return X_scaled
@@ -67,21 +71,21 @@ class IsolationForestModel:
     def visualize(self, df, anomalies):
         """Visualize the anomalies on the time vs Oxygen plot."""
         plt.figure(figsize=(10, 6))
-        plt.scatter(df['time'], df['Oxygen'], c=anomalies, cmap='coolwarm', marker='o')
-        plt.xlabel('Time')
-        plt.ylabel('Oxygen')
+        plt.scatter(df[self.time_column], df[self.value_column], c=anomalies, cmap='coolwarm', marker='o')
+        plt.xlabel(self.time_column)
+        plt.ylabel(self.value_column)
         plt.title('Anomaly Detection using Isolation Forest')
         plt.colorbar(label='Anomaly (1) or Normal (0)')
         plt.show()
 
-    def run_pipeline(self, df):
+    def run_pipeline(self, df, time_column, value_column):
         """Run the full anomaly detection pipeline."""
         X_scaled = self.preprocess_data(df)
         self.train(X_scaled)
         anomalies, anomaly_scores = self.predict(X_scaled)
         df['anomaly'] = anomalies
         self.visualize(df, anomalies)
-
+        print(f"Detected anomalies: {sum(anomalies)}")
         return df, anomalies, anomaly_scores
 
 
@@ -89,9 +93,8 @@ class IsolationForestModel:
 if __name__ == "__main__":
     from src.utils.get_data import get_data
 
-    data = get_data("1T")
-    rf_model = IsolationForestModel(n_estimators=100, contamination=0.05)
-    result_df, anomalies, anomaly_scores = rf_model.run_pipeline(data)
+    data = get_data("1min")
+    rf_model = IsolationForestModel(time_column=TIME_COLUMN, value_column=VALUE_COLUMN,n_estimators=100, contamination=0.05)
+    result_df, anomalies, anomaly_scores = rf_model.run_pipeline(data, time_column=TIME_COLUMN, value_column=VALUE_COLUMN)
 
-    print(f"Detected anomalies: {sum(anomalies)}")
     print(result_df.head())

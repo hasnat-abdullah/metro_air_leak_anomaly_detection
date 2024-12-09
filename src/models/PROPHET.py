@@ -18,11 +18,13 @@ Applications:
 - Anomaly detection in financial and operational metrics.
 - Monitoring seasonal patterns in environmental data.
 """
-from prophet import Prophet
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from prophet import Prophet
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+from config import TIME_COLUMN, VALUE_COLUMN
 
 
 class ProphetModel:
@@ -31,6 +33,7 @@ class ProphetModel:
 
     def train(self, train_data: pd.DataFrame):
         """Train the Prophet model."""
+        print(train_data)
         train_data.columns = ["ds", "y"]
 
         self.model.fit(train_data)
@@ -85,7 +88,7 @@ class ProphetModel:
         self.plot_residuals(forecast, test)
         self.plot_anomalies(forecast, test, threshold)
 
-    def evaluate(self, train: pd.DataFrame, test: pd.DataFrame)-> dict:
+    def evaluate(self, train: pd.DataFrame, test: pd.DataFrame) -> dict:
         """Train and evaluate the model with residuals and anomalies."""
         self.train(train)
         forecast = self.predict(test[['ds']])
@@ -109,30 +112,32 @@ class ProphetModel:
             "merged_test": test,
         }
 
-    def run_pipeline(self, df: pd.DataFrame, train_size: float = 0.8, threshold: float = 0.2):
+    def run_pipeline(self, df: pd.DataFrame, time_column: str, value_column: str, train_size: float = 0.8,
+                     threshold: float = 0.2):
         """
         Run the complete pipeline: train, predict, evaluate, and visualize.
+        :param time_column:
         :param df: The dataframe containing the time series data.
         :param train_size: The fraction of data to use for training (default 80%).
         :param threshold: The threshold for anomaly detection based on residuals.
         """
+        df = df.rename(columns={time_column: "ds", value_column: "y"})
         train = df.iloc[:int(len(df) * train_size)]
         test = df.iloc[int(len(df) * train_size):]
 
         results = self.evaluate(train, test)
         self.visualize(results["forecast"], test=results["merged_test"], threshold=threshold)
-
-        return results
+        print("\nProphet Model Forecast Evaluation:")
+        print(results)
+        return results, None, None
 
 
 if __name__ == "__main__":
     from src.utils.get_data import get_data
+
     data = get_data(one_data_in_x_minutes="10T")
-    data = data.rename(columns={"time": "ds", "Oxygen": "y"})
+
     prophet_model = ProphetModel()
     # Run the pipeline
-    evaluation_results = prophet_model.run_pipeline(data)
+    evaluation_results = prophet_model.run_pipeline(data, time_column=TIME_COLUMN, value_column=VALUE_COLUMN)
 
-    # Print results
-    print("\nProphet Model Forecast Evaluation:")
-    print(evaluation_results)

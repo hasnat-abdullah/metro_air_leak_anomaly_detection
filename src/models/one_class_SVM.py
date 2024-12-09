@@ -35,19 +35,23 @@ from sklearn.svm import OneClassSVM
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
+from config import TIME_COLUMN, VALUE_COLUMN
 
-class OneClassSVMAnomalyDetection:
-    def __init__(self, kernel='rbf', nu=0.05, gamma='scale'):
+
+class OneClassSVMModel:
+    def __init__(self, time_column, value_column, kernel='rbf', nu=0.05, gamma='scale'):
         self.kernel = kernel
         self.nu = nu
         self.gamma = gamma
         self.scaler = MinMaxScaler()
+        self.time_column = time_column
+        self.value_column = value_column
         self.model = OneClassSVM(kernel=self.kernel, nu=self.nu, gamma=self.gamma)
 
     def preprocess_data(self, df):
         """Scale the data for One-Class SVM."""
-        df['Oxygen_scaled'] = self.scaler.fit_transform(df[['Oxygen']])
-        return df[['Oxygen_scaled']].values
+        df[f'{self.value_column}_scaled'] = self.scaler.fit_transform(df[[self.value_column]])
+        return df[[f'{self.value_column}_scaled']].values
 
     def train(self, X):
         """Train the One-Class SVM model."""
@@ -66,20 +70,20 @@ class OneClassSVMAnomalyDetection:
     def visualize(self, df, anomalies):
         """Visualize anomalies on the time vs. Oxygen plot."""
         plt.figure(figsize=(10, 6))
-        plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
+        plt.plot(df[self.time_column], df[self.value_column], label=self.value_column, color='blue')
         plt.scatter(
-            df['time'][anomalies],
-            df['Oxygen'][anomalies],
+            df[self.time_column][anomalies],
+            df[self.value_column][anomalies],
             label='Anomalies',
             color='red'
         )
-        plt.xlabel('Time')
-        plt.ylabel('Oxygen')
+        plt.xlabel(self.time_column)
+        plt.ylabel(self.value_column)
         plt.title('Anomaly Detection using One-Class SVM')
         plt.legend()
         plt.show()
 
-    def run_pipeline(self, df):
+    def run_pipeline(self, df, time_column, value_column):
         """Run the One-Class SVM anomaly detection pipeline."""
         # Preprocess data
         X = self.preprocess_data(df)
@@ -91,7 +95,7 @@ class OneClassSVMAnomalyDetection:
         df['anomaly'] = anomalies
 
         self.visualize(df, anomalies)
-
+        print(f"Detected anomalies: {sum(anomalies)}")
         return df, anomalies, anomaly_scores
 
 
@@ -99,9 +103,8 @@ class OneClassSVMAnomalyDetection:
 if __name__ == "__main__":
     from src.utils.get_data import get_data
 
-    data = get_data("10T")
-    svm_model = OneClassSVMAnomalyDetection(nu=0.05, gamma='scale')
-    result_df, anomalies, anomaly_scores = svm_model.run_pipeline(data)
+    data = get_data("10min")
+    svm_model = OneClassSVMModel(time_column=TIME_COLUMN, value_column=VALUE_COLUMN, nu=0.05, gamma='scale')
+    result_df, anomalies, anomaly_scores = svm_model.run_pipeline(data, time_column=TIME_COLUMN, value_column=VALUE_COLUMN)
 
-    print(f"Detected anomalies: {sum(anomalies)}")
     print(result_df.head())

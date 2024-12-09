@@ -23,9 +23,11 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 
+from config import TIME_COLUMN, VALUE_COLUMN
+
 
 class ARIMAModel:
-    def __init__(self, order=(1, 1, 1)):
+    def __init__(self,time_column, value_column, order=(1, 1, 1)):
         """
         Initialize ARIMA model with specified (p, d, q) parameters.
         :param order: (p, d, q) tuple representing the ARIMA model order
@@ -34,14 +36,16 @@ class ARIMAModel:
         self.model = None
         self.fitted_model = None
         self.predictions = None
+        self.time_column = time_column
+        self.value_column = value_column
 
     def train(self, df: pd.DataFrame):
         """Train the ARIMA model on the provided data."""
         print("Training ARIMA model...")
         # Ensure 'time' is datetime and set as index
         print(df)
-        df['time'] = pd.to_datetime(df['time'])
-        df.set_index('time', inplace=True)
+        df[self.time_column] = pd.to_datetime(df[self.time_column])
+        df.set_index(self.time_column, inplace=True)
 
         # Train ARIMA model on the 'Oxygen' column
         self.model = ARIMA(df['Oxygen'], order=self.order)
@@ -70,20 +74,19 @@ class ARIMAModel:
         plt.figure(figsize=(10, 6))
         plt.plot(df.index, df['Oxygen'], label='Actual', color='blue')
         plt.plot(df.index, self.fitted_model.predict(start=0, end=len(df)-1), label='Predicted', color='red')
-        plt.xlabel('Time')
+        plt.xlabel(self.time_column)
         plt.ylabel('Oxygen')
         plt.title('ARIMA Model: Actual vs Predicted Oxygen Levels')
         plt.legend()
         plt.show()
 
-    def run_pipeline(self, df: pd.DataFrame, steps=10):
+    def run_pipeline(self, df: pd.DataFrame, time_column: str, value_column: str, steps=10):
         """Run the ARIMA pipeline."""
-        # Preprocess the data: ensure 'time' column is datetime
-        df['time'] = pd.to_datetime(df['time'])
-        # Train the ARIMA model
+        df[self.time_column] = pd.to_datetime(df[self.time_column])
+        # Train
         self.train(df)
 
-        # Predict the next steps
+        # Predict
         predictions = self.predict(steps)
 
         # Evaluate the model
@@ -91,17 +94,18 @@ class ARIMAModel:
 
         # Visualize the results
         self.visualize(df)
+        print(f"Predictions: {predictions}")
+        print(f"Mean Squared Error: {mse}")
 
-        return predictions, mse, df
+        return df, predictions, mse
 
 
 if __name__ == "__main__":
     from src.utils.get_data import get_data
     data = get_data(one_data_in_x_minutes="20T")
-    arima_model = ARIMAModel(order=(1, 1, 1))
-    predictions, mse, result_df = arima_model.run_pipeline(data, steps=3)
+    arima_model = ARIMAModel(TIME_COLUMN, VALUE_COLUMN,order=(1, 1, 1))
+    result_df, predictions, mse = arima_model.run_pipeline(data,time_column=TIME_COLUMN, value_column=VALUE_COLUMN, steps=3)
 
     # Output results
-    print(f"Predictions: {predictions}")
-    print(f"Mean Squared Error: {mse}")
+
     print(result_df)

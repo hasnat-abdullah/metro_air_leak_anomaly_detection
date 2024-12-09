@@ -31,10 +31,11 @@ from sklearn.metrics import silhouette_score
 import numpy as np
 import matplotlib.pyplot as plt
 
+from config import VALUE_COLUMN, TIME_COLUMN
+
 
 class DBSCANModel:
     def __init__(self, eps=0.5, min_samples=5):
-        # Initialize DBSCAN model with specified eps and min_samples
         self.model = DBSCAN(eps=eps, min_samples=min_samples)
         self.labels = None
 
@@ -60,23 +61,23 @@ class DBSCANModel:
             print("Silhouette Score cannot be computed, only one cluster detected.")
             return None
 
-    def visualize(self, df):
+    def visualize(self, df, time_column, value_column):
         """Visualize the clustering result on the time vs Oxygen plot."""
         plt.figure(figsize=(10, 6))
-        plt.scatter(df['time'], df['Oxygen'], c=self.labels, cmap='viridis', marker='o')
-        plt.xlabel('Time')
-        plt.ylabel('Oxygen')
-        plt.title('DBSCAN Clustering on Oxygen Levels')
+        plt.scatter(df[time_column], df[value_column], c=self.labels, cmap='viridis', marker='o')
+        plt.xlabel(time_column)
+        plt.ylabel(value_column)
+        plt.title(f'DBSCAN Clustering on {value_column} Levels')
         plt.colorbar(label='Cluster Label')
         plt.show()
 
-    def run_pipeline(self, df: pd.DataFrame):
+    def run_pipeline(self, df: pd.DataFrame, time_column: str, value_column: str):
         """Run the full DBSCAN pipeline with visualization."""
         # Ensure time is in datetime format
-        df['time'] = pd.to_datetime(df['time'])
+        df[time_column] = pd.to_datetime(df[time_column])
 
         # Preprocessing: Extract Oxygen values and use 'time' for index (but not directly in DBSCAN)
-        X = df[['Oxygen']]  # DBSCAN works only on numeric data, so we use only 'Oxygen'
+        X = df[[value_column]]  # DBSCAN works only on numeric data, so we use only 'Oxygen'
 
         # Train the DBSCAN model
         self.train(X)
@@ -89,18 +90,19 @@ class DBSCANModel:
         silhouette = self.evaluate(X)
 
         # Visualize the clustering result
-        self.visualize(df)
+        self.visualize(df, time_column, value_column)
 
-        return predictions, silhouette, df
+        print(f"Predicted labels: {predictions}")
+        print(f"Silhouette score: {silhouette}")
+
+        return df, predictions, silhouette
 
 
 if __name__ == "__main__":
     from src.utils.get_data import get_data
     data = get_data("10T")
     dbscan_model = DBSCANModel(eps=0.2, min_samples=2)
-    predictions, silhouette, result_df = dbscan_model.run_pipeline(data)
+    result_df, predictions, silhouette = dbscan_model.run_pipeline(data,time_column=TIME_COLUMN, value_column=VALUE_COLUMN)
 
     # Output results
-    print(f"Predicted labels: {predictions}")
-    print(f"Silhouette score: {silhouette}")
     print(result_df)

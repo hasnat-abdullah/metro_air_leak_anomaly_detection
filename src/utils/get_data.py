@@ -10,8 +10,8 @@ def get_data(one_data_in_x_minutes=""):
     data = data_loader.load_data()
 
     # SAMPLE DATA
-    data["time"] = pd.to_datetime(data["time"])
-    data.set_index("time", inplace=True)
+    data[TIME_COLUMN] = pd.to_datetime(data[TIME_COLUMN])
+    data.set_index(TIME_COLUMN, inplace=True)
     start_time = "2023-12-01 00:00:00"
     end_time = "2024-02-29 04:55:02"
     data = data.loc[start_time:end_time]
@@ -20,5 +20,5 @@ def get_data(one_data_in_x_minutes=""):
         data = data.resample(one_data_in_x_minutes).mean().dropna()
     print(len(data))
     data.reset_index(inplace=True)
-    data.rename(columns={"index": 'time'}, inplace=True)
+    data.rename(columns={"index": TIME_COLUMN}, inplace=True)
     return data

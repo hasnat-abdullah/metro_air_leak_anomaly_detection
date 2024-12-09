@@ -43,25 +43,25 @@ Variants:
 K-Means is widely used for clustering problems due to its simplicity and efficiency, though its performance can degrade if the clusters have complex shapes or if the data contains significant outliers.
 """
 
-import pandas as pd
-import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import euclidean_distances
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.metrics import euclidean_distances
+from sklearn.preprocessing import MinMaxScaler
 
 
 class KMeansModel:
-    def __init__(self, n_clusters=3):
+    def __init__(self, time_column, value_column, n_clusters=3):
         self.n_clusters = n_clusters
         self.scaler = MinMaxScaler()
         self.kmeans = None
         self.threshold = None
+        self.time_column = time_column
+        self.value_column = value_column
 
     def preprocess_data(self, df):
         """Scale the data for K-Means."""
-        df['Oxygen_scaled'] = self.scaler.fit_transform(df[['Oxygen']])
-        return df[['Oxygen_scaled']].values
+        df[f'{self.value_column}_scaled'] = self.scaler.fit_transform(df[[self.value_column]])
+        return df[[f'{self.value_column}_scaled']].values
 
     def train(self, X):
         """Train the K-Means model and calculate the distance threshold for anomalies."""
@@ -87,8 +87,8 @@ class KMeansModel:
         plt.figure(figsize=(10, 6))
         plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
         plt.scatter(
-            df['time'][anomalies],
-            df['Oxygen'][anomalies],
+            df[self.time_column][anomalies],
+            df[self.value_column][anomalies],
             label='Anomalies',
             color='red'
         )
@@ -98,7 +98,7 @@ class KMeansModel:
         plt.legend()
         plt.show()
 
-    def run_pipeline(self, df):
+    def run_pipeline(self, df, time_column, value_column):
         """Run the K-Means anomaly detection pipeline."""
         # Preprocess data
         X = self.preprocess_data(df)
@@ -115,19 +115,18 @@ class KMeansModel:
 
         # Visualize anomalies
         self.visualize(df, anomalies, anomaly_scores)
-
+        print(f"Detected anomalies: {sum(anomalies)}")
         return df, anomalies, anomaly_scores
 
 
 # Usage
 if __name__ == "__main__":
-    # Assuming 'data' is your dataframe
     from src.utils.get_data import get_data
-    data = get_data("1T")  # Replace with your actual data source
+
+    data = get_data("1T")
 
     kmeans_model = KMeansModel(n_clusters=3)
     result_df, anomalies, anomaly_scores = kmeans_model.run_pipeline(data)
 
     # Output results
-    print(f"Detected anomalies: {sum(anomalies)}")
     print(result_df.head())
