@@ -31,16 +31,12 @@ def generate(data: DataFrame, time_column, value_column, save_dir):
 
 if __name__ == "__main__":
     # -------- Import data from CSV --------
-    data_loader = CSVDataLoader(file_path=CSV_FILE_PATH)
-    data = data_loader.load_data()
+    from src.utils.get_data import get_data
 
-    data['time'] = pd.to_datetime(data['time'])
-    start_time = pd.to_datetime('2023-12-01 00:00:00')
-    end_time = '2024-02-29 04:55:02'
-    data = data[(data['time'] >= start_time) & (data['time'] <= end_time)]
+    input_data = get_data("50min")
 
     # -------- Show Data overview --------
-    print(data[VALUE_COLUMN].describe())
+    print(input_data[VALUE_COLUMN].describe())
 
     # -------- Generate Plots --------
-    generate(data=data, time_column=TIME_COLUMN, value_column=VALUE_COLUMN, save_dir=PLOT_SAVE_PATH)
+    generate(data=input_data, time_column=TIME_COLUMN, value_column=VALUE_COLUMN, save_dir=PLOT_SAVE_PATH)

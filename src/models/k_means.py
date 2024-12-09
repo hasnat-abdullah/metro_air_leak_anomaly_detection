@@ -48,6 +48,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import euclidean_distances
 from sklearn.preprocessing import MinMaxScaler
 
+from config import TIME_COLUMN, VALUE_COLUMN
+
 
 class KMeansModel:
     def __init__(self, time_column, value_column, n_clusters=3):
@@ -125,7 +127,7 @@ if __name__ == "__main__":
 
     data = get_data("1T")
 
-    kmeans_model = KMeansModel(n_clusters=3)
+    kmeans_model = KMeansModel(time_column=TIME_COLUMN, value_column=VALUE_COLUMN, n_clusters=3)
     result_df, anomalies, anomaly_scores = kmeans_model.run_pipeline(data)
 
     # Output results

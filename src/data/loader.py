@@ -24,6 +24,7 @@ class CSVDataLoader(DataLoader):
         return pd.read_csv(self.file_path, usecols=self.usecols)
 
 
+
 class PostgreSQLDataLoader(DataLoader):
     def __init__(self, db_url: str, query: str):
         self.engine = create_engine(db_url)
