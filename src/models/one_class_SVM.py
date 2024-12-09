@@ -55,7 +55,7 @@ class OneClassSVMAnomalyDetection:
         self.model.fit(X)
         print("Model training completed.")
 
-    def predict_anomalies(self, X):
+    def predict(self, X):
         """Predict anomalies using the trained model."""
         predictions = self.model.predict(X)
         anomaly_scores = self.model.decision_function(X)
@@ -63,7 +63,7 @@ class OneClassSVMAnomalyDetection:
         anomalies = predictions == -1
         return anomalies, anomaly_scores
 
-    def visualize_anomalies(self, df, anomalies):
+    def visualize(self, df, anomalies):
         """Visualize anomalies on the time vs. Oxygen plot."""
         plt.figure(figsize=(10, 6))
         plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
@@ -85,12 +85,12 @@ class OneClassSVMAnomalyDetection:
         X = self.preprocess_data(df)
 
         self.train(X)
-        anomalies, anomaly_scores = self.predict_anomalies(X)
+        anomalies, anomaly_scores = self.predict(X)
 
         df['anomaly_score'] = anomaly_scores
         df['anomaly'] = anomalies
 
-        self.visualize_anomalies(df, anomalies)
+        self.visualize(df, anomalies)
 
         return df, anomalies, anomaly_scores
 
@@ -99,7 +99,7 @@ class OneClassSVMAnomalyDetection:
 if __name__ == "__main__":
     from src.utils.get_data import get_data
 
-    data = get_data("")
+    data = get_data("10T")
     svm_model = OneClassSVMAnomalyDetection(nu=0.05, gamma='scale')
     result_df, anomalies, anomaly_scores = svm_model.run_pipeline(data)
 

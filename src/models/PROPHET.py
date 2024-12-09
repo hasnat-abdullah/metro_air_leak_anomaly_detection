@@ -79,7 +79,13 @@ class ProphetModel:
         plt.legend()
         plt.show()
 
-    def evaluate(self, train: pd.DataFrame, test: pd.DataFrame, threshold: float):
+    def visualize(self, forecast: pd.DataFrame, test: pd.DataFrame, threshold: float):
+        """Visualize forecast, residuals, and anomalies."""
+        self.plot_forecast(forecast, test)
+        self.plot_residuals(forecast, test)
+        self.plot_anomalies(forecast, test, threshold)
+
+    def evaluate(self, train: pd.DataFrame, test: pd.DataFrame)-> dict:
         """Train and evaluate the model with residuals and anomalies."""
         self.train(train)
         forecast = self.predict(test[['ds']])
@@ -95,17 +101,12 @@ class ProphetModel:
         print(f"MAE: {mae}")
         print(f"RMSE: {rmse}")
 
-
-        # Visualizations
-        self.plot_forecast(forecast, test)
-        self.plot_residuals(forecast, test)
-        self.plot_anomalies(forecast, test, threshold)
-
         return {
             "mae": mae,
             "rmse": rmse,
             "residuals": test['error'],
-            "forecast": test
+            "forecast": test,
+            "merged_test": test,
         }
 
     def run_pipeline(self, df: pd.DataFrame, train_size: float = 0.8, threshold: float = 0.2):
@@ -118,14 +119,15 @@ class ProphetModel:
         train = df.iloc[:int(len(df) * train_size)]
         test = df.iloc[int(len(df) * train_size):]
 
-        evaluation_results = self.evaluate(train, test, threshold)
+        results = self.evaluate(train, test)
+        self.visualize(results["forecast"], test=results["merged_test"], threshold=threshold)
 
-        return evaluation_results
+        return results
 
 
 if __name__ == "__main__":
     from src.utils.get_data import get_data
-    data = get_data(one_data_in_x_minutes="1T")
+    data = get_data(one_data_in_x_minutes="10T")
     data = data.rename(columns={"time": "ds", "Oxygen": "y"})
     prophet_model = ProphetModel()
     # Run the pipeline

@@ -1,5 +1,5 @@
 import xgboost as xgb
-from .base_model import SupervisedModel
+from src.models.base_model import SupervisedModel
 
 """
 XGBoost (Extreme Gradient Boosting)

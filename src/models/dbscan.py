@@ -60,7 +60,7 @@ class DBSCANModel:
             print("Silhouette Score cannot be computed, only one cluster detected.")
             return None
 
-    def visualize_clusters(self, df):
+    def visualize(self, df):
         """Visualize the clustering result on the time vs Oxygen plot."""
         plt.figure(figsize=(10, 6))
         plt.scatter(df['time'], df['Oxygen'], c=self.labels, cmap='viridis', marker='o')
@@ -89,14 +89,14 @@ class DBSCANModel:
         silhouette = self.evaluate(X)
 
         # Visualize the clustering result
-        self.visualize_clusters(df)
+        self.visualize(df)
 
         return predictions, silhouette, df
 
 
 if __name__ == "__main__":
     from src.utils.get_data import get_data
-    data = get_data("60T")
+    data = get_data("10T")
     dbscan_model = DBSCANModel(eps=0.2, min_samples=2)
     predictions, silhouette, result_df = dbscan_model.run_pipeline(data)
 

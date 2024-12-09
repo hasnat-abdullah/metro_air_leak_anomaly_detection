@@ -28,7 +28,7 @@ Applications:
 """
 
 from sklearn.ensemble import IsolationForest
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 class RandomCutForest(UnsupervisedModel):
     def __init__(self, n_estimators=100, max_samples='auto'):

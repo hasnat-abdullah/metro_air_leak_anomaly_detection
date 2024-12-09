@@ -30,7 +30,7 @@ Applications:
 
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import RobustScaler
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 
 class RPCA(UnsupervisedModel):

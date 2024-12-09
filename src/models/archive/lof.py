@@ -44,7 +44,7 @@ In practice, LOF is useful for anomaly detection in scenarios where the dataset 
 """
 
 from sklearn.neighbors import LocalOutlierFactor
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 class LOFModel(UnsupervisedModel):
     def __init__(self, n_neighbors=20):

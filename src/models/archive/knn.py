@@ -51,7 +51,7 @@ In practice, KNN is widely used in a variety of applications, especially when th
 
 from sklearn.neighbors import NearestNeighbors
 import numpy as np
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 class KNNModel(UnsupervisedModel):
     def __init__(self, n_neighbors=5):

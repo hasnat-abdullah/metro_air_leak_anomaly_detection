@@ -37,7 +37,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 import matplotlib.pyplot as plt
 
-class LSTMAnomalyDetection:
+class LSTMModel:
     def __init__(self, seq_length=10, dropout=0.2, epochs=50, batch_size=32):
         self.seq_length = seq_length
         self.epochs = epochs
@@ -84,7 +84,7 @@ class LSTMAnomalyDetection:
         )
         print("Model training completed.")
 
-    def predict_anomalies(self, sequences):
+    def predict(self, sequences):
         """Predict anomalies using the trained LSTM model."""
         predictions = self.model.predict(sequences[:, :-1, np.newaxis])
         mse = np.mean((predictions - sequences[:, -1])**2, axis=1)
@@ -94,7 +94,7 @@ class LSTMAnomalyDetection:
         anomalies = mse > threshold
         return anomalies, mse, threshold
 
-    def visualize_anomalies(self, df, anomalies, anomaly_scores, threshold):
+    def visualize(self, df, anomalies, anomaly_scores, threshold):
         """Visualize anomalies on the time vs. Oxygen plot."""
         plt.figure(figsize=(10, 6))
         plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
@@ -120,7 +120,7 @@ class LSTMAnomalyDetection:
         self.train(sequences)
 
         # Predict anomalies
-        anomalies, anomaly_scores, threshold = self.predict_anomalies(sequences)
+        anomalies, anomaly_scores, threshold = self.predict(sequences)
 
         # Add anomaly scores to the original dataframe
         df = df.iloc[self.seq_length:].reset_index(drop=True)
@@ -128,7 +128,7 @@ class LSTMAnomalyDetection:
         df['anomaly'] = anomalies
 
         # Visualize anomalies
-        self.visualize_anomalies(df, anomalies, anomaly_scores, threshold)
+        self.visualize(df, anomalies, anomaly_scores, threshold)
 
         return df, anomalies, anomaly_scores
 
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     from src.utils.get_data import get_data
     data = get_data("10T")  # Replace with your actual data source
 
-    lstm_model = LSTMAnomalyDetection(seq_length=10, epochs=50, batch_size=32)
+    lstm_model = LSTMModel(seq_length=10, epochs=50, batch_size=32)
     result_df, anomalies, anomaly_scores = lstm_model.run_pipeline(data)
 
     # Output results

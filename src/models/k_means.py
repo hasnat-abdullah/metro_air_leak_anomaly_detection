@@ -51,7 +51,7 @@ from sklearn.metrics import euclidean_distances
 import matplotlib.pyplot as plt
 
 
-class KMeansAnomalyDetection:
+class KMeansModel:
     def __init__(self, n_clusters=3):
         self.n_clusters = n_clusters
         self.scaler = MinMaxScaler()
@@ -76,13 +76,13 @@ class KMeansAnomalyDetection:
         self.threshold = distances.mean() + 3 * distances.std()
         print(f"Anomaly detection threshold: {self.threshold}")
 
-    def predict_anomalies(self, X):
+    def predict(self, X):
         """Predict anomalies based on the distance threshold."""
         distances = euclidean_distances(X, self.kmeans.cluster_centers_).min(axis=1)
         anomalies = distances > self.threshold
         return anomalies, distances
 
-    def visualize_anomalies(self, df, anomalies, anomaly_scores):
+    def visualize(self, df, anomalies, anomaly_scores):
         """Visualize anomalies on the time vs. Oxygen plot."""
         plt.figure(figsize=(10, 6))
         plt.plot(df['time'], df['Oxygen'], label='Oxygen', color='blue')
@@ -107,14 +107,14 @@ class KMeansAnomalyDetection:
         self.train(X)
 
         # Predict anomalies
-        anomalies, anomaly_scores = self.predict_anomalies(X)
+        anomalies, anomaly_scores = self.predict(X)
 
         # Add anomaly information to the original dataframe
         df['anomaly_score'] = anomaly_scores
         df['anomaly'] = anomalies
 
         # Visualize anomalies
-        self.visualize_anomalies(df, anomalies, anomaly_scores)
+        self.visualize(df, anomalies, anomaly_scores)
 
         return df, anomalies, anomaly_scores
 
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     from src.utils.get_data import get_data
     data = get_data("1T")  # Replace with your actual data source
 
-    kmeans_model = KMeansAnomalyDetection(n_clusters=3)
+    kmeans_model = KMeansModel(n_clusters=3)
     result_df, anomalies, anomaly_scores = kmeans_model.run_pipeline(data)
 
     # Output results

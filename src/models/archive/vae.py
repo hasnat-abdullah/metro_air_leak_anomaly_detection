@@ -31,7 +31,7 @@ Applications:
 
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 
 class VAEModel(UnsupervisedModel):

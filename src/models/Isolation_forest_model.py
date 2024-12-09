@@ -55,7 +55,7 @@ class IsolationForestModel:
         self.model.fit(X)
         print(f"Model trained with contamination ratio: {self.model.contamination}")
 
-    def predict_anomalies(self, X):
+    def predict(self, X):
         """Predict anomalies using Isolation Forest model."""
         print("Predicting anomalies...")
         # Predict anomalies: -1 for anomalies, 1 for normal points
@@ -64,7 +64,7 @@ class IsolationForestModel:
         anomaly_scores = self.model.decision_function(X)
         return anomalies, anomaly_scores
 
-    def visualize_anomalies(self, df, anomalies):
+    def visualize(self, df, anomalies):
         """Visualize the anomalies on the time vs Oxygen plot."""
         plt.figure(figsize=(10, 6))
         plt.scatter(df['time'], df['Oxygen'], c=anomalies, cmap='coolwarm', marker='o')
@@ -78,9 +78,9 @@ class IsolationForestModel:
         """Run the full anomaly detection pipeline."""
         X_scaled = self.preprocess_data(df)
         self.train(X_scaled)
-        anomalies, anomaly_scores = self.predict_anomalies(X_scaled)
+        anomalies, anomaly_scores = self.predict(X_scaled)
         df['anomaly'] = anomalies
-        self.visualize_anomalies(df, anomalies)
+        self.visualize(df, anomalies)
 
         return df, anomalies, anomaly_scores
 

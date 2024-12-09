@@ -23,7 +23,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 import numpy as np
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 class AutoEncoder(UnsupervisedModel):
     def __init__(self, input_dim):

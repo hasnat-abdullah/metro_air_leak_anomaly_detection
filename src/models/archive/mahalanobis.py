@@ -30,7 +30,7 @@ Applications:
 
 import numpy as np
 from scipy.spatial.distance import mahalanobis
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 class MahalanobisModel(UnsupervisedModel):
     def __init__(self):

@@ -44,7 +44,7 @@ In practice, LODA is often used when dealing with high-dimensional data where tr
 """
 
 from pyod.models.loda import LODA
-from .base_model import UnsupervisedModel
+from src.models.base_model import UnsupervisedModel
 
 class LODAModel(UnsupervisedModel):
     def __init__(self, n_bins=10):
