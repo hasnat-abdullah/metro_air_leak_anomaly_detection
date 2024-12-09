@@ -21,6 +21,7 @@ class CSVDataLoader(DataLoader):
 
     @track_execution_time
     def load_data(self):
+        print(f'import file - {self.file_path}')
         return pd.read_csv(self.file_path, usecols=self.usecols)
 
 

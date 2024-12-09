@@ -15,12 +15,12 @@ def get_data(one_data_in_x_minutes=""):
     if one_data_in_x_minutes:
         # Step 2: Resample to one row per minute (mean for numerical values)
         data = data.resample(one_data_in_x_minutes).mean().dropna()
-    print(len(data))
+    print(f'total raw row - {len(data)}')
     data.reset_index(inplace=True)
     data.rename(columns={"index": TIME_COLUMN}, inplace=True)
     return data
 
-def align_time_in_csv(df: pd.DataFrame, time_column='time', granularity='1s'):
+def align_time_in_csv(df: pd.DataFrame, time_column='time', granularity='1800s'):
     """
     Align timestamps in a single CSV file to a specified granularity.
 
@@ -41,7 +41,9 @@ def align_time_in_csv(df: pd.DataFrame, time_column='time', granularity='1s'):
 
     # Optionally group by the aligned time to handle duplicates
     df = df.groupby(time_column, as_index=False).mean()  # Taking mean as an example for aggregation
-
+    print(f'rows after grouping by {time_column}: {len(df)}')
+    # Assuming `df` is your DataFrame
+    df.to_csv('output_filename.csv', index=False)
     return df
 
 if __name__ == "__main__":

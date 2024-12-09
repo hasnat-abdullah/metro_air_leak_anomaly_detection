@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # -------- Import data from CSV --------
     from src.utils.get_data import get_data
 
-    input_data = get_data("50min")
+    input_data = get_data("1min")
 
     # -------- Show Data overview --------
     print(input_data[VALUE_COLUMN].describe())
